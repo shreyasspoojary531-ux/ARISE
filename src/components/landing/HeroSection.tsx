@@ -89,7 +89,7 @@ export function HeroSection() {
               className="flex flex-wrap items-center gap-4 pt-2"
             >
               <Button variant="cyan" size="lg" asChild>
-                <Link href="#">
+                <Link href="/login">
                   Start Your Journey
                 </Link>
               </Button>

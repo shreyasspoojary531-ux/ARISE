@@ -71,10 +71,10 @@ export function Navbar() {
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <Button variant="secondary" size="sm" asChild>
-              <Link href="#github">Login</Link>
+              <Link href="/login">Login</Link>
             </Button>
             <Button variant="cyan" size="sm" asChild>
-              <Link href="#">Start Your Journey</Link>
+              <Link href="/login">Start Your Journey</Link>
             </Button>
           </div>
 
@@ -106,10 +106,10 @@ export function Navbar() {
             </ul>
             <div className="flex flex-col gap-2 pt-2 border-t border-neutral-900">
               <Button variant="secondary" className="w-full text-center" asChild>
-                <Link href="#github" onClick={() => setMenuState(false)}>Login</Link>
+                <Link href="/login" onClick={() => setMenuState(false)}>Login</Link>
               </Button>
               <Button variant="cyan" className="w-full text-center" asChild>
-                <Link href="#" onClick={() => setMenuState(false)}>Start Your Journey</Link>
+                <Link href="/login" onClick={() => setMenuState(false)}>Start Your Journey</Link>
               </Button>
             </div>
           </div>

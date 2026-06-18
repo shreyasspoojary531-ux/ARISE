@@ -1,0 +1,394 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react'
+import { signup } from '@/app/auth/actions'
+import { cn } from '@/lib/utils'
+
+// ── Password strength ─────────────────────────────────────────────────────
+
+function getStrength(pwd: string): number {
+  let score = 0
+  if (pwd.length >= 8) score++
+  if (/[A-Z]/.test(pwd)) score++
+  if (/[0-9]/.test(pwd)) score++
+  if (/[^A-Za-z0-9]/.test(pwd)) score++
+  return score
+}
+
+const STRENGTH_META: Record<number, { label: string; color: string; text: string }> = {
+  0: { label: '',       color: 'bg-neutral-800', text: ''             },
+  1: { label: 'WEAK',   color: 'bg-red-500',     text: 'text-red-400' },
+  2: { label: 'FAIR',   color: 'bg-orange-400',  text: 'text-orange-400' },
+  3: { label: 'GOOD',   color: 'bg-yellow-400',  text: 'text-yellow-400' },
+  4: { label: 'STRONG', color: 'bg-cyan-400',    text: 'text-cyan-400'  },
+}
+
+// ── Shared sub-components (same pattern as LoginForm) ─────────────────────
+
+interface InputFieldProps {
+  id: string
+  label: string
+  type?: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  icon?: React.ReactNode
+  endAdornment?: React.ReactNode
+  error?: string
+  autoComplete?: string
+  extra?: React.ReactNode
+}
+
+function InputField({
+  id, label, type = 'text', value, onChange,
+  placeholder, icon, endAdornment, error, autoComplete, extra,
+}: InputFieldProps) {
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="block font-orbitron text-[9px] tracking-widest text-neutral-500 uppercase">
+        {label}
+      </label>
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-700 pointer-events-none">
+            {icon}
+          </div>
+        )}
+        <input
+          id={id}
+          name={id}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          className={cn(
+            'w-full bg-neutral-900/60 border text-white text-sm font-sans placeholder:text-neutral-700',
+            'px-4 py-3 outline-none transition-colors duration-200',
+            '[clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]',
+            icon && 'pl-9',
+            endAdornment && 'pr-10',
+            error
+              ? 'border-red-500/50 focus:border-red-400/70'
+              : 'border-neutral-800 focus:border-cyan-500/50',
+          )}
+        />
+        {endAdornment && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            {endAdornment}
+          </div>
+        )}
+      </div>
+      {extra}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            key="err"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center gap-1.5 font-sans text-xs text-red-400"
+          >
+            <AlertCircle size={10} className="shrink-0" />
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function CheckboxField({
+  id, checked, onChange, label,
+}: { id: string; checked: boolean; onChange: (v: boolean) => void; label: React.ReactNode }) {
+  return (
+    <label htmlFor={id} className="flex items-start gap-2.5 cursor-pointer group">
+      <div
+        className={cn(
+          'relative w-4 h-4 shrink-0 mt-0.5 border transition-colors duration-150',
+          '[clip-path:polygon(0_2px,2px_0,100%_0,100%_calc(100%-2px),calc(100%-2px)_100%,0_100%)]',
+          checked ? 'border-cyan-500 bg-cyan-500/20' : 'border-neutral-700 bg-neutral-900 group-hover:border-neutral-600',
+        )}
+      >
+        <input
+          type="checkbox"
+          id={id}
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="sr-only"
+        />
+        {checked && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-2 h-2 bg-cyan-400" />
+          </motion.div>
+        )}
+      </div>
+      <span className="font-sans text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors leading-relaxed">
+        {label}
+      </span>
+    </label>
+  )
+}
+
+// ── StrengthMeter ──────────────────────────────────────────────────────────
+
+function StrengthMeter({ password }: { password: string }) {
+  const strength = getStrength(password)
+  const meta = STRENGTH_META[strength]
+
+  if (!password) return null
+
+  return (
+    <div className="space-y-1.5 pt-1">
+      <div className="flex gap-1">
+        {[1, 2, 3, 4].map((level) => (
+          <motion.div
+            key={level}
+            className={cn(
+              'h-[2px] flex-1 rounded-full transition-colors duration-300 origin-left',
+              strength >= level ? meta.color : 'bg-neutral-800',
+            )}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.3, delay: level * 0.05 }}
+          />
+        ))}
+      </div>
+      {strength > 0 && (
+        <span className={cn('font-orbitron text-[8px] tracking-widest', meta.text)}>
+          STRENGTH: {meta.label}
+        </span>
+      )}
+    </div>
+  )
+}
+
+// ── SignupForm ────────────────────────────────────────────────────────────
+
+type FormErrors = Partial<Record<'name' | 'email' | 'password' | 'confirmPassword' | 'terms', string>>
+
+export function SignupForm() {
+  const [name, setName]                 = useState('')
+  const [email, setEmail]               = useState('')
+  const [password, setPassword]         = useState('')
+  const [confirm, setConfirm]           = useState('')
+  const [showPassword, setShowPwd]      = useState(false)
+  const [showConfirm, setShowConfirm]   = useState(false)
+  const [acceptedTerms, setTerms]       = useState(false)
+  const [errors, setErrors]             = useState<FormErrors>({})
+  const [formError, setFormError]       = useState('')
+  const [successMsg, setSuccessMsg]     = useState('')
+  const [isPending, startTransition]    = useTransition()
+
+  // ── Validation ──────────────────────────────────────────────────────────
+
+  const validate = () => {
+    const errs: FormErrors = {}
+    if (!name.trim())                   errs.name = 'Display name is required.'
+    if (!email.trim())                  errs.email = 'Email is required.'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Enter a valid email.'
+    if (!password)                      errs.password = 'Password is required.'
+    else if (getStrength(password) < 2) errs.password = 'Password is too weak. Add uppercase, numbers, or symbols.'
+    if (!confirm)                       errs.confirmPassword = 'Please confirm your password.'
+    else if (password !== confirm)      errs.confirmPassword = 'Passwords do not match.'
+    if (!acceptedTerms)                 errs.terms = 'You must accept the terms to continue.'
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  // ── Submit ──────────────────────────────────────────────────────────────
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormError('')
+    setSuccessMsg('')
+    if (!validate()) return
+
+    startTransition(async () => {
+      const fd = new FormData()
+      fd.set('name', name)
+      fd.set('email', email)
+      fd.set('password', password)
+      const result = await signup(fd)
+      if (result?.error) {
+        setFormError(result.error)
+      } else if (result?.success && result.message) {
+        setSuccessMsg(result.message)
+      }
+    })
+  }
+
+  // ── Success state ───────────────────────────────────────────────────────
+
+  if (successMsg) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center gap-4 py-6 text-center"
+      >
+        <div className="w-12 h-12 rounded-full border border-cyan-500/30 bg-cyan-500/10 flex items-center justify-center">
+          <CheckCircle size={22} className="text-cyan-400" />
+        </div>
+        <div>
+          <p className="font-orbitron text-sm tracking-widest text-white uppercase">Profile Created</p>
+          <p className="font-sans text-xs text-neutral-500 mt-1 leading-relaxed max-w-xs">{successMsg}</p>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="w-1 h-1 bg-cyan-500 animate-ping rounded-full" />
+          <span className="font-orbitron text-[9px] tracking-widest text-neutral-600 uppercase">
+            Awaiting email confirmation
+          </span>
+        </div>
+      </motion.div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      {/* Form-level error */}
+      <AnimatePresence>
+        {formError && (
+          <motion.div
+            key="form-err"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="flex items-start gap-2.5 border border-red-500/30 bg-red-500/10 px-3 py-3 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]"
+          >
+            <AlertCircle size={13} className="text-red-400 shrink-0 mt-0.5" />
+            <span className="font-sans text-xs text-red-300">{formError}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Display Name */}
+      <InputField
+        id="name"
+        label="Display Name"
+        value={name}
+        onChange={(v) => { setName(v); setErrors((e) => ({ ...e, name: undefined })) }}
+        placeholder="Shadow Monarch"
+        icon={<User size={13} />}
+        error={errors.name}
+        autoComplete="name"
+      />
+
+      {/* Email */}
+      <InputField
+        id="email"
+        label="Email Address"
+        type="email"
+        value={email}
+        onChange={(v) => { setEmail(v); setErrors((e) => ({ ...e, email: undefined })) }}
+        placeholder="hunter@arise.dev"
+        icon={<Mail size={13} />}
+        error={errors.email}
+        autoComplete="email"
+      />
+
+      {/* Password + strength meter */}
+      <InputField
+        id="password"
+        label="Password"
+        type={showPassword ? 'text' : 'password'}
+        value={password}
+        onChange={(v) => { setPassword(v); setErrors((e) => ({ ...e, password: undefined })) }}
+        placeholder="••••••••••••"
+        icon={<Lock size={13} />}
+        endAdornment={
+          <button
+            type="button"
+            onClick={() => setShowPwd((s) => !s)}
+            className="text-neutral-700 hover:text-neutral-400 transition-colors cursor-pointer"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+          </button>
+        }
+        error={errors.password}
+        autoComplete="new-password"
+        extra={<StrengthMeter password={password} />}
+      />
+
+      {/* Confirm Password */}
+      <InputField
+        id="confirm-password"
+        label="Confirm Password"
+        type={showConfirm ? 'text' : 'password'}
+        value={confirm}
+        onChange={(v) => { setConfirm(v); setErrors((e) => ({ ...e, confirmPassword: undefined })) }}
+        placeholder="••••••••••••"
+        icon={<Lock size={13} />}
+        endAdornment={
+          <button
+            type="button"
+            onClick={() => setShowConfirm((s) => !s)}
+            className="text-neutral-700 hover:text-neutral-400 transition-colors cursor-pointer"
+            aria-label={showConfirm ? 'Hide password' : 'Show password'}
+          >
+            {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
+          </button>
+        }
+        error={errors.confirmPassword}
+        autoComplete="new-password"
+      />
+
+      {/* Terms */}
+      <div className="space-y-1">
+        <CheckboxField
+          id="terms"
+          checked={acceptedTerms}
+          onChange={(v) => { setTerms(v); setErrors((e) => ({ ...e, terms: undefined })) }}
+          label={
+            <>
+              I agree to the{' '}
+              <a href="/terms" className="text-cyan-400 hover:text-cyan-300 transition-colors underline underline-offset-2">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="/privacy" className="text-cyan-400 hover:text-cyan-300 transition-colors underline underline-offset-2">
+                Privacy Policy
+              </a>
+            </>
+          }
+        />
+        {errors.terms && (
+          <p className="flex items-center gap-1.5 font-sans text-xs text-red-400 pl-6">
+            <AlertCircle size={10} className="shrink-0" />
+            {errors.terms}
+          </p>
+        )}
+      </div>
+
+      {/* Submit */}
+      <motion.button
+        type="submit"
+        disabled={isPending}
+        whileHover={isPending ? {} : { scale: 1.01 }}
+        whileTap={isPending ? {} : { scale: 0.99 }}
+        className="w-full relative flex items-center justify-center gap-2.5 font-orbitron text-[11px] tracking-widest uppercase font-bold mt-1 py-3.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]
+          before:absolute before:inset-0 before:-z-10 before:[clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]
+          before:bg-cyan-500/30 hover:before:bg-cyan-400/40 before:transition-colors
+          after:absolute after:inset-[1px] after:-z-10 after:[clip-path:polygon(0_5px,5px_0,100%_0,100%_calc(100%-5px),calc(100%-5px)_100%,0_100%)]
+          after:bg-cyan-950/30 after:transition-colors
+          text-cyan-400 hover:text-cyan-300"
+      >
+        {isPending ? (
+          <>
+            <div className="w-3.5 h-3.5 rounded-full border border-cyan-700 border-t-cyan-400 animate-spin" />
+            Initializing Profile...
+          </>
+        ) : (
+          'Initialize Hunter Profile'
+        )}
+      </motion.button>
+    </form>
+  )
+}

@@ -42,9 +42,14 @@ export default function RadialOrbitalTimeline({
   const [pulseEffect, setPulseEffect] = useState<Record<number, boolean>>({});
   const [activeNodeId, setActiveNodeId] = useState<number | null>(null);
   const [orbitRadius, setOrbitRadius] = useState<number>(200);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const orbitRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleContainerClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === containerRef.current || e.target === orbitRef.current) {
@@ -177,6 +182,18 @@ export default function RadialOrbitalTimeline({
         return "text-white bg-black/40 border-white/50";
     }
   };
+
+  if (!mounted) {
+    return (
+      <div
+        className={cn(
+          "w-full h-screen flex flex-col items-center justify-center bg-black overflow-visible",
+          className
+        )}
+        ref={containerRef}
+      />
+    );
+  }
 
   return (
     <div
