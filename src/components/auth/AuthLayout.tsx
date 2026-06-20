@@ -1,4 +1,5 @@
 import { AuthBackground } from './AuthBackground'
+import Image from 'next/image'
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -8,13 +9,13 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="min-h-screen flex bg-black">
 
-      {/* ── Left panel: branding (desktop only) ─────────────────────── */}
-      <div className="hidden lg:flex lg:flex-1 relative min-h-screen">
+      {/* ── Left panel: branding (desktop only) — 50% ─────────────── */}
+      <div className="hidden lg:flex lg:w-1/2 relative min-h-screen">
         <AuthBackground />
       </div>
 
-      {/* ── Right panel: form ────────────────────────────────────────── */}
-      <div className="flex-1 lg:max-w-[480px] flex flex-col items-center justify-center p-6 sm:p-10 relative min-h-screen overflow-y-auto">
+      {/* ── Right panel: form — 50% ────────────────────────────────── */}
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 sm:p-10 relative min-h-screen overflow-y-auto">
 
         {/* Mobile: subtle background elements */}
         <div className="absolute inset-0 lg:hidden pointer-events-none">
@@ -28,11 +29,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
         <div className="relative z-10 w-full flex flex-col items-center gap-0">
 
-          {/* Mobile: logo header */}
+          {/* Mobile: logo only — no ARISE text */}
           <div className="lg:hidden mb-8 text-center">
-            <h1 className="font-orbitron text-5xl font-black tracking-widest text-white">
-              A<span className="text-cyan-400">R</span>ISE
-            </h1>
+            <Image src="/images/logo.png" alt="ARISE" width={80} height={80} className="object-contain w-20 h-20" />
             <div className="h-px w-20 mx-auto my-2 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
             <p className="font-orbitron text-[9px] tracking-[0.25em] text-neutral-600 uppercase">
               Hunter System Online
@@ -41,8 +40,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
           {children}
 
-          {/* Bottom branding */}
-          <p className="mt-8 font-orbitron text-[8px] tracking-widest text-neutral-800 uppercase">
+          {/* Bottom branding — desktop only to avoid redundant "ARISE" text on mobile */}
+          <p className="mt-8 font-orbitron text-[8px] tracking-widest text-neutral-800 uppercase hidden lg:block">
             ARISE // All rights reserved
           </p>
         </div>

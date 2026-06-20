@@ -47,6 +47,8 @@ export default function RadialOrbitalTimeline({
   const orbitRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
+  // Suppressing this lint rule as it is the canonical pattern for client-only hydration guards.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydration guard requires synchronous browser state check
   useEffect(() => {
     setMounted(true);
   }, []);

@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { AuthCard } from '@/components/auth/AuthCard'
 import { SignupForm } from '@/components/auth/SignupForm'
-import { OAuthButtons } from '@/components/auth/OAuthButtons'
 
 export const metadata: Metadata = {
   title: 'Create Account // ARISE',
@@ -17,7 +16,6 @@ export default function SignupPage() {
         title="Create Profile"
         subtitle="Begin your hunter journey"
       >
-        <OAuthButtons mode="signup" />
         <SignupForm />
 
         <p className="text-center font-sans text-xs text-neutral-600 mt-5">

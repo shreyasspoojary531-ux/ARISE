@@ -4,44 +4,40 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const REDIRECT_TO = "/onboarding";
 
 // ---------------------------------------------------------------------------
 // Email + Password Auth
 // ---------------------------------------------------------------------------
 
 export async function login(formData: FormData) {
-  console.log("[Auth Action] login: Initiated");
   const supabase = await createClient();
 
   const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
 
   if (!email || !password) {
-    console.warn("[Auth Action] login: Missing email or password");
     return { error: "Email and password are required." };
   }
 
-  console.log(`[Auth Action] login: Attempting signInWithPassword for ${email}`);
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    console.error("[Auth Action] login: signInWithPassword failed:", error.message);
+    console.error("[Auth] login failed:", error.message);
     return { error: error.message };
   }
 
-  console.log("[Auth Action] login: signInWithPassword successful");
+  console.log("[Auth] login successful. User:", data.user?.id);
   revalidatePath("/", "layout");
-  return { success: true };
+  return { success: true, redirectTo: REDIRECT_TO };
 }
 
+// ---------------------------------------------------------------------------
+// Signup — email confirmation is DISABLED, so signUp returns an active
+// session immediately. We auto-login and redirect.
+// ---------------------------------------------------------------------------
+
 export async function signup(formData: FormData) {
-  console.log("[Auth Action] signup: Initiated");
   const supabase = await createClient();
 
   const name = (formData.get("name") as string)?.trim();
@@ -49,38 +45,224 @@ export async function signup(formData: FormData) {
   const password = formData.get("password") as string;
 
   if (!name || !email || !password) {
-    console.warn("[Auth Action] signup: Missing fields");
     return { error: "All fields are required." };
   }
 
-  console.log(`[Auth Action] signup: Attempting signUp for ${email} (${name})`);
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { full_name: name, display_name: name },
-      emailRedirectTo: `${SITE_URL}/auth/callback`,
     },
   });
 
   if (error) {
-    console.error("[Auth Action] signup: signUp failed:", error.message);
+    console.error("[Auth] signup failed:", error.message);
     return { error: error.message };
   }
 
-  console.log("[Auth Action] signup: signUp successful. Awaiting verification.");
-  return {
-    success: true,
-    message:
-      "Account created! Check your email to confirm your hunter profile.",
-  };
+  const user = data.user;
+  const session = data.session;
+
+  // Supabase returns user=null when the email already exists (no error thrown)
+  if (!user) {
+    return { error: "This email is already registered. Try signing in instead." };
+  }
+
+  // Empty identities array = duplicate registration attempt
+  if (user.identities && user.identities.length === 0) {
+    return { error: "This email is already registered. Try signing in instead." };
+  }
+
+  // Email confirmation disabled — session should be active immediately
+  if (session) {
+    console.log("[Auth] signup + auto-login. User:", user.id);
+    revalidatePath("/", "layout");
+    return { success: true, redirectTo: REDIRECT_TO };
+  }
+
+  // Fallback: if for some reason session isn't returned, try to sign in
+  console.warn("[Auth] signup succeeded but no session — attempting signInWithPassword");
+  const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (loginError) {
+    return { success: true, redirectTo: "/login", message: "Account created. Please sign in." };
+  }
+
+  console.log("[Auth] signup + manual login. User:", loginData.user?.id);
+  revalidatePath("/", "layout");
+  return { success: true, redirectTo: REDIRECT_TO };
 }
 
+// ---------------------------------------------------------------------------
+// Onboarding
+// ---------------------------------------------------------------------------
+
+export async function acceptSystemContract() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase.from("onboarding_contracts").upsert(
+    {
+      user_id: user.id,
+      accepted: true,
+      accepted_at: new Date().toISOString(),
+      declined_at: null,
+    },
+    { onConflict: "user_id" }
+  );
+
+  if (error) {
+    console.error("[Onboarding] acceptance failed:", error.message);
+    return { error: error.message };
+  }
+
+  revalidatePath("/onboarding", "page");
+  return { success: true };
+}
+
+export async function declineSystemContract() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    await supabase.from("onboarding_contracts").upsert(
+      {
+        user_id: user.id,
+        accepted: false,
+        accepted_at: null,
+        declined_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+  }
+
+  await supabase.auth.signOut();
+  revalidatePath("/", "layout");
+  redirect("/");
+}
+
+export async function submitPlayerRegistration(formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const name = (formData.get("name") as string)?.trim();
+  const age = Number(formData.get("age"));
+  const goal = (formData.get("goal") as string)?.trim();
+
+  if (!name || !age || !goal) {
+    return { error: "Full name, age, and primary goal are required." };
+  }
+
+  if (!Number.isInteger(age) || age < 13 || age > 120) {
+    return { error: "Enter a valid age between 13 and 120." };
+  }
+
+  const { error } = await supabase.from("player_profiles").upsert(
+    {
+      user_id: user.id,
+      name,
+      age,
+      goal,
+      height: null,
+      weight: null,
+      completed_at: null,
+    },
+    { onConflict: "user_id" }
+  );
+
+  if (error) {
+    console.error("[Onboarding] player registration failed:", error.message);
+    return { error: error.message };
+  }
+
+  revalidatePath("/onboarding", "page");
+  return { success: true };
+}
+
+export async function submitBodyMetrics(formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const height = Number(formData.get("height"));
+  const weight = Number(formData.get("weight"));
+
+  if (!height || !weight) {
+    return { error: "Height and weight are required." };
+  }
+
+  if (!Number.isFinite(height) || height <= 0 || height > 300) {
+    return { error: "Enter a valid height between 1 and 300 cm." };
+  }
+
+  if (!Number.isFinite(weight) || weight <= 0 || weight > 500) {
+    return { error: "Enter a valid weight between 1 and 500 kg." };
+  }
+
+  const { data: existingProfile } = await supabase
+    .from("player_profiles")
+    .select("name, age, goal")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!existingProfile) {
+    return { error: "Complete player registration before body analysis." };
+  }
+
+  const { error } = await supabase.from("player_profiles").upsert(
+    {
+      user_id: user.id,
+      name: existingProfile.name,
+      age: existingProfile.age,
+      goal: existingProfile.goal,
+      height,
+      weight,
+      completed_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" }
+  );
+
+  if (error) {
+    console.error("[Onboarding] body metrics failed:", error.message);
+    return { error: error.message };
+  }
+
+  revalidatePath("/onboarding", "page");
+  revalidatePath("/dashboard", "page");
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// Logout
+// ---------------------------------------------------------------------------
+
 export async function logout() {
-  console.log("[Auth Action] logout: Initiated");
   const supabase = await createClient();
   await supabase.auth.signOut();
-  console.log("[Auth Action] logout: Signed out from Supabase");
   revalidatePath("/", "layout");
   redirect("/login");
 }
@@ -90,84 +272,40 @@ export async function logout() {
 // ---------------------------------------------------------------------------
 
 export async function forgotPassword(formData: FormData) {
-  console.log("[Auth Action] forgotPassword: Initiated");
   const supabase = await createClient();
 
   const email = (formData.get("email") as string)?.trim();
 
   if (!email) {
-    console.warn("[Auth Action] forgotPassword: Missing email");
     return { error: "Email is required." };
   }
 
-  console.log(`[Auth Action] forgotPassword: Resetting password for ${email}`);
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${SITE_URL}/auth/callback?next=/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/auth/callback?next=/reset-password`,
   });
 
   if (error) {
-    console.error("[Auth Action] forgotPassword: resetPasswordForEmail failed:", error.message);
     return { error: error.message };
   }
 
-  console.log("[Auth Action] forgotPassword: Reset email successfully sent");
-  return {
-    success: true,
-    message: "Password reset link sent. Check your email.",
-  };
+  return { success: true, message: "Password reset link sent. Check your email." };
 }
 
 export async function resetPassword(formData: FormData) {
-  console.log("[Auth Action] resetPassword: Initiated");
   const supabase = await createClient();
 
   const password = formData.get("password") as string;
 
   if (!password) {
-    console.warn("[Auth Action] resetPassword: Missing password");
     return { error: "Password is required." };
   }
 
-  console.log("[Auth Action] resetPassword: Updating user password");
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
-    console.error("[Auth Action] resetPassword: updateUser failed:", error.message);
     return { error: error.message };
   }
 
-  console.log("[Auth Action] resetPassword: Password updated successfully");
   revalidatePath("/", "layout");
   return { success: true };
-}
-
-// ---------------------------------------------------------------------------
-// OAuth
-// ---------------------------------------------------------------------------
-
-export async function signInWithGoogle() {
-  console.log("[Auth Action] signInWithGoogle: Initiated");
-  const supabase = await createClient();
-
-  console.log("[Auth Action] signInWithGoogle: Creating OAuth session request");
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${SITE_URL}/auth/callback`,
-      queryParams: { access_type: "offline", prompt: "consent" },
-    },
-  });
-
-  if (error) {
-    console.error("[Auth Action] signInWithGoogle: signInWithOAuth failed:", error.message);
-    return { error: error.message };
-  }
-
-  if (data.url) {
-    console.log("[Auth Action] signInWithGoogle: OAuth URL generated successfully:", data.url);
-    return { success: true, url: data.url };
-  }
-
-  console.error("[Auth Action] signInWithGoogle: No redirect URL returned by Supabase");
-  return { error: "Could not generate authorization URL." };
 }

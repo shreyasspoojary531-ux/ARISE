@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { AuthCard } from '@/components/auth/AuthCard'
 import { LoginForm } from '@/components/auth/LoginForm'
-import { OAuthButtons } from '@/components/auth/OAuthButtons'
 import { AlertCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -32,7 +31,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
         )}
 
-        <OAuthButtons mode="login" />
         <LoginForm />
 
         <p className="text-center font-sans text-xs text-neutral-600 mt-5">

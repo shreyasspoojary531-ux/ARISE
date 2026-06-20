@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { LucideIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface SystemCardProps {
   title: string

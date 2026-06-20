@@ -6,7 +6,6 @@ import { ArrowRight } from 'lucide-react'
 import { Github } from '@/components/icons/Github'
 import { Button } from '@/components/ui/button'
 import { AnimatedGroup } from '@/components/ui/animated-group'
-import { TextEffect } from '@/components/ui/text-effect'
 import { HunterStatusPanel } from './HunterStatusPanel'
 
 export function HeroSection() {

@@ -40,11 +40,11 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo Section */}
           <Link href="/" className="flex items-center gap-3 group">
-            <Image 
-              src="/images/arise-logo.png" 
-              alt="ARISE Logo Icon" 
-              width={32} 
-              height={32} 
+            <Image
+              src="/images/logo.png"
+              alt="ARISE Logo Icon"
+              width={40}
+              height={40}
               className="object-contain"
             />
             
@@ -74,7 +74,7 @@ export function Navbar() {
               <Link href="/login">Login</Link>
             </Button>
             <Button variant="cyan" size="sm" asChild>
-              <Link href="/login">Start Your Journey</Link>
+              <Link href="/signup">Start Your Journey</Link>
             </Button>
           </div>
 
@@ -109,7 +109,7 @@ export function Navbar() {
                 <Link href="/login" onClick={() => setMenuState(false)}>Login</Link>
               </Button>
               <Button variant="cyan" className="w-full text-center" asChild>
-                <Link href="/login" onClick={() => setMenuState(false)}>Start Your Journey</Link>
+                <Link href="/signup" onClick={() => setMenuState(false)}>Start Your Journey</Link>
               </Button>
             </div>
           </div>

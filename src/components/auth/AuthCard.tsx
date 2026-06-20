@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 interface AuthCardProps {
   children: React.ReactNode
@@ -37,8 +38,8 @@ export function AuthCard({ children, title, subtitle }: AuthCardProps) {
 
         {/* Card header */}
         <div className="mb-7">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="w-1.5 h-1.5 bg-cyan-500 animate-pulse inline-block" />
+          <div className="hidden lg:flex items-center gap-2 mb-3">
+            <Image src="/images/logo.png" alt="ARISE" width={40} height={40} className="object-contain" />
             <span className="font-orbitron text-[8px] tracking-[0.3em] text-neutral-600 uppercase">
               ARISE // AUTH SYSTEM
             </span>

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, AlertCircle } from 'lucide-react'
 import { signup } from '@/app/auth/actions'
 import { cn } from '@/lib/utils'
 
@@ -25,7 +26,7 @@ const STRENGTH_META: Record<number, { label: string; color: string; text: string
   4: { label: 'STRONG', color: 'bg-cyan-400',    text: 'text-cyan-400'  },
 }
 
-// ── Shared sub-components (same pattern as LoginForm) ─────────────────────
+// ── Shared sub-components ─────────────────────────────────────────────────
 
 interface InputFieldProps {
   id: string
@@ -174,6 +175,7 @@ function StrengthMeter({ password }: { password: string }) {
 type FormErrors = Partial<Record<'name' | 'email' | 'password' | 'confirmPassword' | 'terms', string>>
 
 export function SignupForm() {
+  const router = useRouter()
   const [name, setName]                 = useState('')
   const [email, setEmail]               = useState('')
   const [password, setPassword]         = useState('')
@@ -183,10 +185,7 @@ export function SignupForm() {
   const [acceptedTerms, setTerms]       = useState(false)
   const [errors, setErrors]             = useState<FormErrors>({})
   const [formError, setFormError]       = useState('')
-  const [successMsg, setSuccessMsg]     = useState('')
   const [isPending, startTransition]    = useTransition()
-
-  // ── Validation ──────────────────────────────────────────────────────────
 
   const validate = () => {
     const errs: FormErrors = {}
@@ -202,12 +201,9 @@ export function SignupForm() {
     return Object.keys(errs).length === 0
   }
 
-  // ── Submit ──────────────────────────────────────────────────────────────
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setFormError('')
-    setSuccessMsg('')
     if (!validate()) return
 
     startTransition(async () => {
@@ -218,36 +214,12 @@ export function SignupForm() {
       const result = await signup(fd)
       if (result?.error) {
         setFormError(result.error)
-      } else if (result?.success && result.message) {
-        setSuccessMsg(result.message)
+      } else if (result?.success) {
+        const target = result.redirectTo || '/onboarding'
+        router.push(target)
+        router.refresh()
       }
     })
-  }
-
-  // ── Success state ───────────────────────────────────────────────────────
-
-  if (successMsg) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center gap-4 py-6 text-center"
-      >
-        <div className="w-12 h-12 rounded-full border border-cyan-500/30 bg-cyan-500/10 flex items-center justify-center">
-          <CheckCircle size={22} className="text-cyan-400" />
-        </div>
-        <div>
-          <p className="font-orbitron text-sm tracking-widest text-white uppercase">Profile Created</p>
-          <p className="font-sans text-xs text-neutral-500 mt-1 leading-relaxed max-w-xs">{successMsg}</p>
-        </div>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="w-1 h-1 bg-cyan-500 animate-ping rounded-full" />
-          <span className="font-orbitron text-[9px] tracking-widest text-neutral-600 uppercase">
-            Awaiting email confirmation
-          </span>
-        </div>
-      </motion.div>
-    )
   }
 
   return (

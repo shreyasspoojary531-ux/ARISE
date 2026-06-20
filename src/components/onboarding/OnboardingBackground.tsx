@@ -1,0 +1,45 @@
+"use client";
+
+import { motion } from "framer-motion";
+
+const PARTICLES = Array.from({ length: 18 }, (_, index) => ({
+  id: index,
+  left: `${(index * 17) % 100}%`,
+  delay: (index % 6) * 0.7,
+  duration: 8 + (index % 5),
+  size: index % 3 === 0 ? "w-1 h-1" : "w-0.5 h-0.5",
+}));
+
+export function OnboardingBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-black">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0a0a0a_1px,transparent_1px),linear-gradient(to_bottom,#0a0a0a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_55%_at_50%_45%,#000_65%,transparent_100%)] opacity-70" />
+      <div className="absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(0,212,255,0.12)_0%,rgba(0,212,255,0.03)_35%,transparent_70%)]" />
+      <div className="absolute left-1/2 top-1/2 h-[680px] w-[680px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-500/10 bg-cyan-500/5 blur-3xl" />
+
+      {PARTICLES.map((particle) => (
+        <motion.span
+          key={particle.id}
+          className={`absolute ${particle.size} bg-cyan-400/60 shadow-[0_0_12px_rgba(0,212,255,0.7)]`}
+          style={{ left: particle.left, top: "105%" }}
+          animate={{
+            y: [0, -900],
+            opacity: [0, 0.8, 0],
+          }}
+          transition={{
+            duration: particle.duration,
+            delay: particle.delay,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+      ))}
+
+      <motion.div
+        className="absolute left-1/2 top-1/2 h-px w-[90vw] max-w-4xl -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent"
+        animate={{ opacity: [0.25, 0.8, 0.25], scaleX: [0.75, 1.15, 0.75] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </div>
+  );
+}

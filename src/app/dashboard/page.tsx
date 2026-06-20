@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { getOnboardingState, isOnboardingComplete } from '@/lib/onboarding'
 import { logout } from '@/app/auth/actions'
 
 export const metadata: Metadata = {
@@ -8,10 +10,23 @@ export const metadata: Metadata = {
   description: 'Your hunter dashboard.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  if (!user) {
+    redirect('/login')
+  }
+
+  // Gate: redirect to onboarding if not complete
+  const onboardingState = await getOnboardingState(supabase)
+  if (!isOnboardingComplete(onboardingState)) {
+    redirect('/onboarding')
+  }
+
+  // Auth user data
   const displayName =
     user?.user_metadata?.display_name ??
     user?.user_metadata?.full_name ??
@@ -23,6 +38,23 @@ export default async function DashboardPage() {
   const joinedAt = user?.created_at
     ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : '—'
+
+  // Player profile data from onboarding
+  const profile = onboardingState.profile
+  const playerName = profile?.name ?? displayName
+  const playerGoal = profile?.goal ?? '—'
+  const playerAge = profile?.age ? String(profile.age) : '—'
+  const playerHeight = profile?.height ? `${profile.height} cm` : '—'
+  const playerWeight = profile?.weight ? `${profile.weight} kg` : '—'
+
+  const FUTURE_MODULES = [
+    { label: 'SKILLS', status: 'IN DEVELOPMENT' },
+    { label: 'GYM PROGRESSION', status: 'IN DEVELOPMENT' },
+    { label: 'QUESTS', status: 'IN DEVELOPMENT' },
+    { label: 'DAILY MISSIONS', status: 'IN DEVELOPMENT' },
+    { label: 'STATS', status: 'IN DEVELOPMENT' },
+    { label: 'CLAN SYSTEM', status: 'IN DEVELOPMENT' },
+  ]
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -46,11 +78,11 @@ export default async function DashboardPage() {
               ) : (
                 <div className="w-7 h-7 rounded-full border border-neutral-800 bg-neutral-900 flex items-center justify-center">
                   <span className="font-orbitron text-[10px] text-neutral-400 font-bold">
-                    {displayName[0]?.toUpperCase()}
+                    {playerName[0]?.toUpperCase()}
                   </span>
                 </div>
               )}
-              <span className="font-sans text-sm text-neutral-300 hidden sm:block">{displayName}</span>
+              <span className="font-sans text-sm text-neutral-300 hidden sm:block">{playerName}</span>
             </div>
             <form action={logout}>
               <button
@@ -78,11 +110,11 @@ export default async function DashboardPage() {
           <h1 className="font-orbitron text-3xl sm:text-4xl font-black tracking-widest text-white uppercase">
             Welcome,{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-cyan-400">
-              {displayName}
+              {playerName}
             </span>
           </h1>
           <p className="font-sans text-sm text-neutral-500">
-            Your hunter profile is active. The system is ready.
+            Level 1 Player. The system is ready.
           </p>
         </div>
 
@@ -103,7 +135,7 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        {/* Profile panel */}
+        {/* Profile panel with onboarding data */}
         <div className="relative border border-neutral-900 bg-neutral-950/40 backdrop-blur-sm p-6 [clip-path:polygon(0_12px,12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%)]">
           <span className="absolute top-0 left-0 w-5 h-[1px] bg-cyan-500/50" />
           <span className="absolute top-0 left-0 w-[1px] h-5 bg-cyan-500/50" />
@@ -122,14 +154,14 @@ export default async function DashboardPage() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={avatarUrl} alt={displayName} className="w-16 h-16 rounded-full border-2 border-neutral-800 object-cover" />
             ) : (
-              <div className="w-16 h-16 rounded-full border-2 border-neutral-800 bg-neutral-900 flex items-center justify-center [clip-path:polygon(0_8px,8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]">
+              <div className="w-16 h-16 rounded-full border-2 border-neutral-800 bg-neutral-900 flex items-center justify-center">
                 <span className="font-orbitron text-xl text-neutral-400 font-bold">
-                  {displayName[0]?.toUpperCase()}
+                  {playerName[0]?.toUpperCase()}
                 </span>
               </div>
             )}
             <div className="space-y-1">
-              <p className="font-orbitron text-base font-bold text-white tracking-widest">{displayName}</p>
+              <p className="font-orbitron text-base font-bold text-white tracking-widest">{playerName}</p>
               <p className="font-sans text-sm text-neutral-500">{email}</p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="w-1 h-1 bg-green-500 rounded-full animate-ping" />
@@ -137,16 +169,65 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* Onboarding data grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6 pt-5 border-t border-neutral-900">
+            {[
+              { label: 'PRIMARY GOAL', value: playerGoal },
+              { label: 'AGE', value: playerAge },
+              { label: 'HEIGHT', value: playerHeight },
+              { label: 'WEIGHT', value: playerWeight },
+            ].map(({ label, value }) => (
+              <div key={label} className="border border-neutral-900 bg-black/40 py-3 px-3 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]">
+                <div className="font-orbitron text-[8px] tracking-widest text-neutral-700">{label}</div>
+                <div className="font-orbitron text-xs font-bold text-cyan-400 mt-0.5">{value}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Coming soon notice */}
-        <div className="border border-neutral-900 border-dashed bg-neutral-950/20 p-8 text-center [clip-path:polygon(0_8px,8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]">
-          <p className="font-orbitron text-xs tracking-widest text-neutral-700 uppercase">
-            Full Dashboard // Coming Soon
-          </p>
-          <p className="font-sans text-xs text-neutral-800 mt-1">
-            Quests, habits, skill trees, and progression systems are being built.
-          </p>
+        {/* System status card */}
+        <div className="relative border border-cyan-500/20 bg-neutral-950/60 backdrop-blur-sm p-6 [clip-path:polygon(0_12px,12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%)]">
+          <span className="absolute top-0 left-0 w-5 h-[1px] bg-cyan-500/50" />
+          <span className="absolute top-0 left-0 w-[1px] h-5 bg-cyan-500/50" />
+          <span className="absolute bottom-0 right-0 w-5 h-[1px] bg-cyan-500/50" />
+          <span className="absolute bottom-0 right-0 w-[1px] h-5 bg-cyan-500/50" />
+
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-1.5 h-1.5 bg-cyan-500 animate-pulse" />
+            <span className="font-orbitron text-[9px] tracking-widest text-neutral-600 uppercase">
+              System Status
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            <div className="flex items-center gap-2 border border-green-500/20 bg-green-500/5 px-3 py-2.5 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+              <span className="font-orbitron text-[9px] tracking-widest text-green-400 uppercase">System Status: Active</span>
+            </div>
+            <div className="flex items-center gap-2 border border-cyan-500/20 bg-cyan-500/5 px-3 py-2.5 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]">
+              <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full" />
+              <span className="font-orbitron text-[9px] tracking-widest text-cyan-400 uppercase">Player Init: Complete</span>
+            </div>
+          </div>
+
+          {/* Future modules */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-1 h-1 bg-neutral-600" />
+              <span className="font-orbitron text-[9px] tracking-widest text-neutral-600 uppercase">
+                Future Modules // Coming Soon
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {FUTURE_MODULES.map((mod) => (
+                <div key={mod.label} className="border border-neutral-900 bg-black/40 py-3 px-4 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]">
+                  <div className="font-orbitron text-[9px] tracking-widest text-neutral-500 uppercase">{mod.label}</div>
+                  <div className="font-orbitron text-[8px] tracking-widest text-neutral-800 mt-0.5">{mod.status}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </main>
     </div>

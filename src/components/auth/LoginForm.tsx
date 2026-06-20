@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
 import { login } from '@/app/auth/actions'
 import { cn } from '@/lib/utils'
 
@@ -131,8 +130,6 @@ export function LoginForm() {
   const [formError, setFormError]   = useState('')
   const [isPending, startTransition] = useTransition()
 
-  // ── Validation ──────────────────────────────────────────────────────────
-
   const validate = () => {
     const errs: typeof errors = {}
     if (!email.trim()) errs.email = 'Email is required.'
@@ -141,8 +138,6 @@ export function LoginForm() {
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
-
-  // ── Submit ──────────────────────────────────────────────────────────────
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -157,7 +152,8 @@ export function LoginForm() {
       if (result?.error) {
         setFormError(result.error)
       } else if (result?.success) {
-        router.push('/dashboard')
+        const target = result.redirectTo || '/onboarding'
+        router.push(target)
         router.refresh()
       }
     })
@@ -225,12 +221,12 @@ export function LoginForm() {
           onChange={setRememberMe}
           label="Remember me"
         />
-        <Link
+        <a
           href="/forgot-password"
           className="font-orbitron text-[9px] tracking-widest text-neutral-600 hover:text-cyan-400 uppercase transition-colors"
         >
           Forgot Password?
-        </Link>
+        </a>
       </div>
 
       {/* Submit */}

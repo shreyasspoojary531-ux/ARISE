@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 // Pre-computed to avoid SSR/hydration mismatch
 const PARTICLES = [
@@ -92,10 +93,19 @@ export function AuthBackground() {
           </span>
         </div>
 
-        {/* Logo */}
-        <div className="space-y-3">
+        {/* Logo mark + wordmark */}
+        <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="flex justify-center"
+          >
+            <Image src="/images/logo.png" alt="ARISE Logo" width={80} height={80} className="object-contain" priority />
+          </motion.div>
+
           <motion.h1
-            className="font-orbitron text-8xl font-black tracking-widest text-white leading-none"
+            className="font-orbitron text-7xl font-black tracking-widest text-white leading-none"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
