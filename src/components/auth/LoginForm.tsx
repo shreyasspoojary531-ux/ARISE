@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
 import { login } from '@/app/auth/actions'
+import { useAuthStages } from '@/lib/use-auth-stages'
 import { cn } from '@/lib/utils'
 
 // ── Shared input wrapper ──────────────────────────────────────────────────
@@ -128,6 +129,14 @@ export function LoginForm() {
   const [formError, setFormError]   = useState('')
   const [isPending, startTransition] = useTransition()
 
+  // Staged loading messages — creates a "system booting" feel
+  const { label: stageLabel, isFinalStage } = useAuthStages(isPending, [
+    { label: 'Authenticating...',       ms: 0    },
+    { label: 'Verifying credentials...', ms: 800  },
+    { label: 'Accessing system...',      ms: 1800 },
+    { label: 'Access Granted',          ms: 2800 },
+  ])
+
   const validate = () => {
     const errs: typeof errors = {}
     if (!email.trim()) errs.email = 'Email is required.'
@@ -231,17 +240,39 @@ export function LoginForm() {
         disabled={isPending}
         whileHover={isPending ? {} : { scale: 1.01 }}
         whileTap={isPending ? {} : { scale: 0.99 }}
-        className="w-full relative flex items-center justify-center gap-2.5 font-orbitron text-[11px] tracking-widest uppercase font-bold mt-2 py-3.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]
-          before:absolute before:inset-0 before:-z-10 before:[clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]
-          before:bg-cyan-500/30 hover:before:bg-cyan-400/40 before:transition-colors
-          after:absolute after:inset-[1px] after:-z-10 after:[clip-path:polygon(0_5px,5px_0,100%_0,100%_calc(100%-5px),calc(100%-5px)_100%,0_100%)]
-          after:bg-cyan-950/30 after:transition-colors
-          text-cyan-400 hover:text-cyan-300"
+        className={cn(
+          "w-full relative flex items-center justify-center gap-2.5 font-orbitron text-[11px] tracking-widest uppercase font-bold mt-2 py-3.5 transition-all duration-200 disabled:cursor-not-allowed cursor-pointer [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]",
+          "before:absolute before:inset-0 before:-z-10 before:[clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]",
+          "before:bg-cyan-500/30 hover:before:bg-cyan-400/40 before:transition-colors",
+          "after:absolute after:inset-[1px] after:-z-10 after:[clip-path:polygon(0_5px,5px_0,100%_0,100%_calc(100%-5px),calc(100%-5px)_100%,0_100%)]",
+          "after:bg-cyan-950/30 after:transition-colors",
+          isPending && !isFinalStage ? "opacity-80" : "disabled:opacity-60",
+          isFinalStage ? "text-green-400" : "text-cyan-400 hover:text-cyan-300"
+        )}
       >
         {isPending ? (
           <>
-            <div className="w-3.5 h-3.5 rounded-full border border-cyan-700 border-t-cyan-400 animate-spin" />
-            Authenticating...
+            {!isFinalStage ? (
+              <div className="w-3.5 h-3.5 rounded-full border border-cyan-700 border-t-cyan-400 animate-spin" />
+            ) : (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-3.5 h-3.5 bg-green-400 [clip-path:polygon(0_2px,2px_0,100%_0,100%_calc(100%-2px),calc(100%-2px)_100%,0_100%)]"
+              />
+            )}
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={stageLabel}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className={cn(isFinalStage && "text-green-400")}
+              >
+                {stageLabel}
+              </motion.span>
+            </AnimatePresence>
           </>
         ) : (
           'Initiate Login'

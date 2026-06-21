@@ -21,31 +21,6 @@ async function clearOnboardingCookie() {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: determine where a logged-in user should go after auth
-// ---------------------------------------------------------------------------
-async function getPostAuthRedirect(supabase: Awaited<ReturnType<typeof createClient>>): Promise<string> {
-  const [{ data: contract }, { data: profile }] = await Promise.all([
-    supabase
-      .from("onboarding_contracts")
-      .select("accepted")
-      .maybeSingle(),
-    supabase
-      .from("player_profiles")
-      .select("name, goal, height, weight")
-      .maybeSingle(),
-  ]);
-
-  const accepted = Boolean(contract?.accepted);
-  const hasNameGoal = Boolean(profile?.name && profile?.goal);
-  const hasAllMetrics = Boolean(profile?.name && profile?.goal && profile?.height && profile?.weight);
-
-  if (!accepted) return "/onboarding/system-acceptance";
-  if (hasAllMetrics) return "/dashboard";
-  if (hasNameGoal) return "/onboarding/body-metrics";
-  return "/onboarding/player-registration";
-}
-
-// ---------------------------------------------------------------------------
 // Email + Password Auth
 // ---------------------------------------------------------------------------
 
@@ -59,17 +34,18 @@ export async function login(formData: FormData) {
     return { error: "Email and password are required." };
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { error: error.message };
   }
 
-  // Returning user: check onboarding state and redirect directly
-  const target = await getPostAuthRedirect(supabase);
+  // One round-trip only — redirect straight to /dashboard.
+  // Middleware (proxy.ts) guards /dashboard and redirects
+  // unfinished-onboarders to the correct onboarding step.
   revalidatePath("/onboarding", "page");
   revalidatePath("/dashboard", "page");
-  redirect(target);
+  redirect("/dashboard");
 }
 
 // ---------------------------------------------------------------------------
@@ -121,21 +97,16 @@ export async function signup(formData: FormData) {
   }
 
   // Fallback: if for some reason session isn't returned, try to sign in
-  const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+  const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
 
   if (loginError) {
     return { success: true, redirectTo: "/login", message: "Account created. Please sign in." };
   }
 
-  // They just signed in fresh — check where they should go
-  if (loginData.user) {
-    const target = await getPostAuthRedirect(supabase);
-    revalidatePath("/onboarding", "page");
-    revalidatePath("/dashboard", "page");
-    redirect(target);
-  }
-
-  redirect("/login");
+  // Signed in — redirect to /dashboard. Middleware handles onboarding check.
+  revalidatePath("/onboarding", "page");
+  revalidatePath("/dashboard", "page");
+  redirect("/dashboard");
 }
 
 // ---------------------------------------------------------------------------
