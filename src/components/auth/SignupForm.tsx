@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, User, AlertCircle } from 'lucide-react'
 import { signup } from '@/app/auth/actions'
@@ -175,7 +174,6 @@ function StrengthMeter({ password }: { password: string }) {
 type FormErrors = Partial<Record<'name' | 'email' | 'password' | 'confirmPassword' | 'terms', string>>
 
 export function SignupForm() {
-  const router = useRouter()
   const [name, setName]                 = useState('')
   const [email, setEmail]               = useState('')
   const [password, setPassword]         = useState('')
@@ -212,13 +210,11 @@ export function SignupForm() {
       fd.set('email', email)
       fd.set('password', password)
       const result = await signup(fd)
+      // signup() now uses redirect() on success — this code only runs on error
       if (result?.error) {
         setFormError(result.error)
-      } else if (result?.success) {
-        const target = result.redirectTo || '/onboarding'
-        router.push(target)
-        router.refresh()
       }
+      // Success = server-side redirect, no client navigation needed
     })
   }
 

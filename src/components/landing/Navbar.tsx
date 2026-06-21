@@ -20,10 +20,17 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = React.useState(false)
 
   React.useEffect(() => {
+    let ticking = false
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40)
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 40)
+          ticking = false
+        })
+        ticking = true
+      }
     }
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -32,8 +39,8 @@ export function Navbar() {
       <nav
         className={cn(
           "mx-auto max-w-7xl px-6 py-4 transition-all duration-300",
-          isScrolled 
-            ? "border-b border-neutral-900 bg-black/80 backdrop-blur-md py-3" 
+          isScrolled
+            ? "border-b border-neutral-900 bg-black/80 backdrop-blur-md py-3"
             : "bg-transparent"
         )}
       >
@@ -46,8 +53,9 @@ export function Navbar() {
               width={40}
               height={40}
               className="object-contain"
+              priority
             />
-            
+
             {/* Geometric Tech Wordmark */}
             <span className="font-orbitron text-xl font-bold tracking-widest text-white group-hover:text-cyan-400 transition-colors">
               ARISE
@@ -56,8 +64,8 @@ export function Navbar() {
 
           {/* Desktop Nav Links */}
           <ul className="hidden md:flex items-center gap-8">
-            {menuItems.map((item, index) => (
-              <li key={index}>
+            {menuItems.map((item) => (
+              <li key={item.name}>
                 <Link
                   href={item.href}
                   className="font-orbitron text-[11px] font-medium tracking-widest text-neutral-400 hover:text-white uppercase transition-colors"
@@ -68,13 +76,13 @@ export function Navbar() {
             ))}
           </ul>
 
-          {/* Action Buttons */}
+          {/* Action Buttons with prefetching */}
           <div className="hidden md:flex items-center gap-4">
             <Button variant="secondary" size="sm" asChild>
-              <Link href="/login">Login</Link>
+              <Link href="/login" prefetch>Login</Link>
             </Button>
             <Button variant="cyan" size="sm" asChild>
-              <Link href="/signup">Start Your Journey</Link>
+              <Link href="/signup" prefetch>Start Your Journey</Link>
             </Button>
           </div>
 
@@ -92,8 +100,8 @@ export function Navbar() {
         {menuState && (
           <div className="md:hidden mt-4 p-4 border border-neutral-900 bg-black/95 backdrop-blur-lg flex flex-col gap-4 [clip-path:polygon(0_8px,_8px_0,_100%_0,_100%_calc(100%-8px),_calc(100%-8px)_100%,_0_100%)]">
             <ul className="flex flex-col gap-4">
-              {menuItems.map((item, index) => (
-                <li key={index}>
+              {menuItems.map((item) => (
+                <li key={item.name}>
                   <Link
                     href={item.href}
                     onClick={() => setMenuState(false)}

@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitBodyMetrics } from "@/app/auth/actions";
 import { AlertCircle } from "lucide-react";
 import { OnboardingInput } from "./OnboardingInput";
 
 export function BodyMetricsForm() {
-  const router = useRouter();
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [errors, setErrors] = useState<{ height?: string; weight?: string }>({});
@@ -43,12 +41,11 @@ export function BodyMetricsForm() {
       fd.set("height", height);
       fd.set("weight", weight);
       const result = await submitBodyMetrics(fd);
+      // submitBodyMetrics() now uses redirect() on success — this only runs on error
       if (result?.error) {
         setFormError(result.error);
-      } else {
-        router.push("/dashboard");
-        router.refresh();
       }
+      // Success = server-side redirect, no client navigation needed
     });
   };
 

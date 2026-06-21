@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import {
   Activity,
   Database,
@@ -10,9 +11,20 @@ import {
 } from 'lucide-react'
 import { Github } from '@/components/icons/Github'
 import { Button } from '@/components/ui/button'
-import RadialOrbitalTimeline, {
-  type TimelineItem,
-} from '@/components/ui/radial-orbital-timeline'
+
+// Lazy-load the heavy radial timeline component — it's below the fold
+// and pulls in substantial Framer Motion / canvas rendering code
+const RadialOrbitalTimeline = dynamic(
+  () => import('@/components/ui/radial-orbital-timeline').then(mod => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[360px] md:h-[420px] bg-transparent animate-pulse" />
+    ),
+  }
+)
+
+import type { TimelineItem } from '@/components/ui/radial-orbital-timeline'
 
 const roadmapSteps: TimelineItem[] = [
   {
@@ -97,7 +109,7 @@ export function OpenSourceSection() {
 
       <div className="mx-auto max-w-7xl px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
+
           {/* Left Column: Heading and GitHub action */}
           <div className="lg:col-span-5 space-y-6 flex flex-col justify-center">
             <div className="flex items-center gap-3">
@@ -106,12 +118,12 @@ export function OpenSourceSection() {
                 COMMUNITY DRIVEN
               </span>
             </div>
-            
+
             <h2 className="font-orbitron text-3xl md:text-4xl font-bold tracking-wider text-white uppercase leading-tight">
               BUILT IN PUBLIC. <br />
               OPEN SOURCE.
             </h2>
-            
+
             <p className="font-sans text-neutral-400 text-xs md:text-sm leading-relaxed max-w-md">
               ARISE is developed openly on GitHub. No closed doors, no proprietary leveling algorithms. Join the community of engineers, designers, and self-improvement enthusiasts designing the ultimate real-life RPG client.
             </p>

@@ -3,7 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type OnboardingStep =
   | "system-acceptance"
   | "player-registration"
-  | "body-metrics";
+  | "body-metrics"
+  | "done";
 
 export type OnboardingState = {
   acceptedSystem: boolean;
@@ -27,20 +28,22 @@ interface ProfileData {
 }
 
 function normalizeProfile(profile: unknown): ProfileData | null {
-  if (!profile) return null;
+  if (!profile || typeof profile !== "object") return null;
+  const p = profile as Record<string, unknown>;
 
   return {
-    name: profile.name ?? null,
-    age: profile.age ?? null,
-    goal: profile.goal ?? null,
-    height: profile.height ?? null,
-    weight: profile.weight ?? null,
+    name: typeof p.name === "string" ? p.name : null,
+    age: typeof p.age === "number" ? p.age : null,
+    goal: typeof p.goal === "string" ? p.goal : null,
+    height: typeof p.height === "number" ? p.height : null,
+    weight: typeof p.weight === "number" ? p.weight : null,
   };
 }
 
 export async function getOnboardingState(
   supabase: SupabaseClient
 ): Promise<OnboardingState> {
+  // Parallel queries — both hit the DB concurrently
   const [{ data: contract }, { data: profile }] = await Promise.all([
     supabase
       .from("onboarding_contracts")
@@ -63,15 +66,18 @@ export async function getOnboardingState(
       normalizedProfile.weight
   );
 
+  // Determine current step in sequential order:
+  // 1. System acceptance must come first
+  // 2. Player registration (name, age, goal)
+  // 3. Body metrics (height, weight)
+  // 4. Done — all complete
   let currentStep: OnboardingStep = "system-acceptance";
-  if (acceptedSystem && !profileComplete) {
-    currentStep = "player-registration";
-  }
-  if (acceptedSystem && normalizedProfile?.name && normalizedProfile.goal && !profileComplete) {
-    currentStep = "body-metrics";
-  }
   if (acceptedSystem && profileComplete) {
+    currentStep = "done";
+  } else if (acceptedSystem && normalizedProfile?.name && normalizedProfile.goal) {
     currentStep = "body-metrics";
+  } else if (acceptedSystem) {
+    currentStep = "player-registration";
   }
 
   return {
@@ -84,13 +90,9 @@ export async function getOnboardingState(
 
 export function getNextOnboardingStep(state: OnboardingState): string {
   if (!state.acceptedSystem) return "/onboarding/system-acceptance";
-  if (!state.profileComplete) {
-    return state.currentStep === "body-metrics"
-      ? "/onboarding/body-metrics"
-      : "/onboarding/player-registration";
-  }
-
-  return "/dashboard";
+  if (state.currentStep === "done" || state.profileComplete) return "/dashboard";
+  if (state.currentStep === "body-metrics") return "/onboarding/body-metrics";
+  return "/onboarding/player-registration";
 }
 
 export function isOnboardingComplete(state: OnboardingState) {

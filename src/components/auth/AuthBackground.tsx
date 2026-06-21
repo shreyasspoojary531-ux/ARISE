@@ -1,38 +1,52 @@
 'use client'
 
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
 // Pre-computed to avoid SSR/hydration mismatch
+// Reduced from 15 to 10 particles — the visual density is nearly identical
+// but the Framer Motion overhead drops by 33%
 const PARTICLES = [
   { id: 0,  x: 4,  duration: 14, delay: 0,   size: 1.5 },
-  { id: 1,  x: 12, duration: 9,  delay: 2,   size: 1 },
-  { id: 2,  x: 21, duration: 16, delay: 5,   size: 2 },
-  { id: 3,  x: 30, duration: 11, delay: 1,   size: 1 },
-  { id: 4,  x: 38, duration: 13, delay: 3.5, size: 1.5 },
-  { id: 5,  x: 47, duration: 10, delay: 4,   size: 2 },
-  { id: 6,  x: 56, duration: 15, delay: 0.5, size: 1 },
-  { id: 7,  x: 64, duration: 12, delay: 2.5, size: 1.5 },
-  { id: 8,  x: 73, duration: 8,  delay: 1.5, size: 1 },
-  { id: 9,  x: 82, duration: 17, delay: 3,   size: 2 },
-  { id: 10, x: 91, duration: 11, delay: 6,   size: 1 },
-  { id: 11, x: 8,  duration: 14, delay: 7,   size: 1.5 },
-  { id: 12, x: 26, duration: 9,  delay: 8,   size: 2 },
-  { id: 13, x: 52, duration: 16, delay: 9,   size: 1 },
-  { id: 14, x: 78, duration: 12, delay: 10,  size: 1.5 },
-]
+  { id: 1,  x: 21, duration: 16, delay: 5,   size: 2 },
+  { id: 2,  x: 38, duration: 13, delay: 3.5, size: 1.5 },
+  { id: 3,  x: 56, duration: 15, delay: 0.5, size: 1 },
+  { id: 4,  x: 73, duration: 8,  delay: 1.5, size: 1 },
+  { id: 5,  x: 82, duration: 17, delay: 3,   size: 2 },
+  { id: 6,  x: 26, duration: 9,  delay: 8,   size: 2 },
+  { id: 7,  x: 52, duration: 16, delay: 9,   size: 1 },
+  { id: 8,  x: 8,  duration: 14, delay: 7,   size: 1.5 },
+  { id: 9,  x: 78, duration: 12, delay: 10,  size: 1.5 },
+] as const
 
 const STATS = [
   { label: 'RANK',    value: 'S-CLASS' },
   { label: 'HUNTERS', value: '∞'       },
   { label: 'STATUS',  value: 'ACTIVE'  },
-]
+] as const
+
+// Memoized particle — avoids re-render from parent state changes
+const AuthParticle = memo(function AuthParticle({
+  x, duration, delay, size,
+}: {
+  x: number; duration: number; delay: number; size: number;
+}) {
+  return (
+    <motion.div
+      className="absolute rounded-full bg-cyan-400/40 will-change-transform"
+      style={{ left: `${x}%`, width: size, height: size, bottom: -4 }}
+      animate={{ y: [0, -900], opacity: [0, 0.7, 0] }}
+      transition={{ duration, delay, repeat: Infinity, ease: 'linear' }}
+    />
+  )
+})
 
 export function AuthBackground() {
   return (
     <div className="relative w-full h-full overflow-hidden bg-black flex flex-col items-center justify-center p-12 select-none">
 
-      {/* Cyberpunk grid */}
+      {/* Cyberpunk grid — static, no animation needed */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#0a0a0a_1px,transparent_1px),linear-gradient(to_bottom,#0a0a0a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-70 pointer-events-none" />
 
       {/* Radial cyan glow */}
@@ -40,25 +54,25 @@ export function AuthBackground() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(0,212,255,0.05)_0%,transparent_70%)]" />
       </div>
 
-      {/* Floating particles */}
+      {/* Floating particles — memoized to prevent re-renders */}
       {PARTICLES.map((p) => (
-        <motion.div
+        <AuthParticle
           key={p.id}
-          className="absolute rounded-full bg-cyan-400/40"
-          style={{ left: `${p.x}%`, width: p.size, height: p.size, bottom: -4 }}
-          animate={{ y: [0, -900], opacity: [0, 0.7, 0] }}
-          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: 'linear' }}
+          x={p.x}
+          duration={p.duration}
+          delay={p.delay}
+          size={p.size}
         />
       ))}
 
       {/* Horizontal scan line */}
       <motion.div
-        className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent pointer-events-none"
+        className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent pointer-events-none will-change-transform"
         animate={{ top: ['0%', '100%'] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
       />
 
-      {/* Hunter silhouette */}
+      {/* Hunter silhouette — static SVG, no Framer Motion */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-[65vh] opacity-[0.06] pointer-events-none">
         <svg viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
           <path d="M400 150 L420 250 L460 260 L440 280 L450 340 L480 390 L490 440 L450 490 L420 600 L380 600 L350 490 L310 440 L320 390 L350 340 L360 280 L340 260 L380 250 Z" fill="url(#auth-bg-gradient)" />
@@ -72,7 +86,7 @@ export function AuthBackground() {
         </svg>
       </div>
 
-      {/* Scan-line overlay */}
+      {/* Scan-line overlay — pure CSS, no runtime cost */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.015]"
         style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 2px,black 2px,black 4px)' }}
@@ -85,7 +99,7 @@ export function AuthBackground() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10 text-center space-y-8 max-w-sm"
       >
-        {/* System status badge */}
+        {/* System status badge — static, no animation needed */}
         <div className="flex items-center justify-center gap-2">
           <span className="w-1.5 h-1.5 bg-cyan-500 animate-pulse rounded-full inline-block" />
           <span className="font-orbitron text-[9px] tracking-[0.3em] text-neutral-500 uppercase">
@@ -149,13 +163,13 @@ export function AuthBackground() {
         </motion.div>
       </motion.div>
 
-      {/* HUD footer */}
+      {/* HUD footer — static */}
       <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center">
         <span className="font-mono text-[8px] text-neutral-800 tracking-wider">ARISE.SYS // AUTH_MODULE</span>
         <span className="font-mono text-[8px] text-neutral-800 tracking-wider">SEC_LEVEL // CLASS-A</span>
       </div>
 
-      {/* Corner accent lines */}
+      {/* Corner accent lines — static, no animation needed */}
       <span className="absolute top-0 left-0 w-16 h-[1px] bg-gradient-to-r from-cyan-500/30 to-transparent" />
       <span className="absolute top-0 left-0 w-[1px] h-16 bg-gradient-to-b from-cyan-500/30 to-transparent" />
       <span className="absolute bottom-0 right-0 w-16 h-[1px] bg-gradient-to-l from-cyan-500/30 to-transparent" />

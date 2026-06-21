@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitPlayerRegistration } from "@/app/auth/actions";
 import { AlertCircle } from "lucide-react";
@@ -17,7 +16,6 @@ const SUGGESTED_GOALS = [
 ];
 
 export function PlayerRegistrationForm() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [goal, setGoal] = useState("");
@@ -50,12 +48,11 @@ export function PlayerRegistrationForm() {
       fd.set("age", age);
       fd.set("goal", goal);
       const result = await submitPlayerRegistration(fd);
+      // submitPlayerRegistration() now uses redirect() on success — this only runs on error
       if (result?.error) {
         setFormError(result.error);
-      } else {
-        router.push("/onboarding/body-metrics");
-        router.refresh();
       }
+      // Success = server-side redirect, no client navigation needed
     });
   };
 

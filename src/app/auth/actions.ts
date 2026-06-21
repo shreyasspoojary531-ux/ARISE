@@ -2,9 +2,48 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 
-const REDIRECT_TO = "/onboarding";
+// ---------------------------------------------------------------------------
+// Onboarding cache cookie — must match proxy.ts
+// ---------------------------------------------------------------------------
+const ONBOARDING_COOKIE = "arise_ob_state";
+
+async function clearOnboardingCookie() {
+  try {
+    const cookieStore = await cookies();
+    cookieStore.set(ONBOARDING_COOKIE, "", { maxAge: 0, path: "/" });
+  } catch {
+    // Server action may not have access to cookie store — safe to ignore.
+    // The 120s TTL on the cache cookie ensures it refreshes quickly anyway.
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Helper: determine where a logged-in user should go after auth
+// ---------------------------------------------------------------------------
+async function getPostAuthRedirect(supabase: Awaited<ReturnType<typeof createClient>>): Promise<string> {
+  const [{ data: contract }, { data: profile }] = await Promise.all([
+    supabase
+      .from("onboarding_contracts")
+      .select("accepted")
+      .maybeSingle(),
+    supabase
+      .from("player_profiles")
+      .select("name, goal, height, weight")
+      .maybeSingle(),
+  ]);
+
+  const accepted = Boolean(contract?.accepted);
+  const hasNameGoal = Boolean(profile?.name && profile?.goal);
+  const hasAllMetrics = Boolean(profile?.name && profile?.goal && profile?.height && profile?.weight);
+
+  if (!accepted) return "/onboarding/system-acceptance";
+  if (hasAllMetrics) return "/dashboard";
+  if (hasNameGoal) return "/onboarding/body-metrics";
+  return "/onboarding/player-registration";
+}
 
 // ---------------------------------------------------------------------------
 // Email + Password Auth
@@ -23,18 +62,19 @@ export async function login(formData: FormData) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    console.error("[Auth] login failed:", error.message);
     return { error: error.message };
   }
 
-  console.log("[Auth] login successful. User:", data.user?.id);
-  revalidatePath("/", "layout");
-  return { success: true, redirectTo: REDIRECT_TO };
+  // Returning user: check onboarding state and redirect directly
+  const target = await getPostAuthRedirect(supabase);
+  revalidatePath("/onboarding", "page");
+  revalidatePath("/dashboard", "page");
+  redirect(target);
 }
 
 // ---------------------------------------------------------------------------
 // Signup — email confirmation is DISABLED, so signUp returns an active
-// session immediately. We auto-login and redirect.
+// session immediately. New users always go to onboarding step 1.
 // ---------------------------------------------------------------------------
 
 export async function signup(formData: FormData) {
@@ -57,7 +97,6 @@ export async function signup(formData: FormData) {
   });
 
   if (error) {
-    console.error("[Auth] signup failed:", error.message);
     return { error: error.message };
   }
 
@@ -74,24 +113,29 @@ export async function signup(formData: FormData) {
     return { error: "This email is already registered. Try signing in instead." };
   }
 
-  // Email confirmation disabled — session should be active immediately
+  // New user → always go to onboarding
   if (session) {
-    console.log("[Auth] signup + auto-login. User:", user.id);
-    revalidatePath("/", "layout");
-    return { success: true, redirectTo: REDIRECT_TO };
+    revalidatePath("/onboarding", "page");
+    revalidatePath("/dashboard", "page");
+    redirect("/onboarding/system-acceptance");
   }
 
   // Fallback: if for some reason session isn't returned, try to sign in
-  console.warn("[Auth] signup succeeded but no session — attempting signInWithPassword");
   const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
 
   if (loginError) {
     return { success: true, redirectTo: "/login", message: "Account created. Please sign in." };
   }
 
-  console.log("[Auth] signup + manual login. User:", loginData.user?.id);
-  revalidatePath("/", "layout");
-  return { success: true, redirectTo: REDIRECT_TO };
+  // They just signed in fresh — check where they should go
+  if (loginData.user) {
+    const target = await getPostAuthRedirect(supabase);
+    revalidatePath("/onboarding", "page");
+    revalidatePath("/dashboard", "page");
+    redirect(target);
+  }
+
+  redirect("/login");
 }
 
 // ---------------------------------------------------------------------------
@@ -120,12 +164,12 @@ export async function acceptSystemContract() {
   );
 
   if (error) {
-    console.error("[Onboarding] acceptance failed:", error.message);
     return { error: error.message };
   }
 
+  clearOnboardingCookie();
   revalidatePath("/onboarding", "page");
-  return { success: true };
+  redirect("/onboarding/player-registration");
 }
 
 export async function declineSystemContract() {
@@ -148,6 +192,7 @@ export async function declineSystemContract() {
   }
 
   await supabase.auth.signOut();
+  clearOnboardingCookie();
   revalidatePath("/", "layout");
   redirect("/");
 }
@@ -189,14 +234,21 @@ export async function submitPlayerRegistration(formData: FormData) {
   );
 
   if (error) {
-    console.error("[Onboarding] player registration failed:", error.message);
     return { error: error.message };
   }
 
+  clearOnboardingCookie();
   revalidatePath("/onboarding", "page");
-  return { success: true };
+  redirect("/onboarding/body-metrics");
 }
 
+/**
+ * Submit body metrics.
+ *
+ * Uses an update-only query to avoid the extra SELECT round-trip.
+ * Only modifies the height, weight, and completed_at columns,
+ * leaving the other columns untouched.
+ */
 export async function submitBodyMetrics(formData: FormData) {
   const supabase = await createClient();
 
@@ -223,37 +275,29 @@ export async function submitBodyMetrics(formData: FormData) {
     return { error: "Enter a valid weight between 1 and 500 kg." };
   }
 
-  const { data: existingProfile } = await supabase
+  // Use UPDATE instead of SELECT + UPSERT — avoids an extra DB round-trip.
+  const { error, count } = await supabase
     .from("player_profiles")
-    .select("name, age, goal")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (!existingProfile) {
-    return { error: "Complete player registration before body analysis." };
-  }
-
-  const { error } = await supabase.from("player_profiles").upsert(
-    {
-      user_id: user.id,
-      name: existingProfile.name,
-      age: existingProfile.age,
-      goal: existingProfile.goal,
+    .update({
       height,
       weight,
       completed_at: new Date().toISOString(),
-    },
-    { onConflict: "user_id" }
-  );
+    })
+    .eq("user_id", user.id);
 
   if (error) {
-    console.error("[Onboarding] body metrics failed:", error.message);
     return { error: error.message };
   }
 
+  // If no rows were updated, the player hasn't completed registration yet
+  if (count === 0) {
+    return { error: "Complete player registration before body analysis." };
+  }
+
+  clearOnboardingCookie();
   revalidatePath("/onboarding", "page");
   revalidatePath("/dashboard", "page");
-  return { success: true };
+  redirect("/dashboard");
 }
 
 // ---------------------------------------------------------------------------
@@ -263,7 +307,9 @@ export async function submitBodyMetrics(formData: FormData) {
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  revalidatePath("/", "layout");
+  clearOnboardingCookie();
+  revalidatePath("/onboarding", "page");
+  revalidatePath("/dashboard", "page");
   redirect("/login");
 }
 
@@ -306,6 +352,7 @@ export async function resetPassword(formData: FormData) {
     return { error: error.message };
   }
 
-  revalidatePath("/", "layout");
+  revalidatePath("/onboarding", "page");
+  revalidatePath("/dashboard", "page");
   return { success: true };
 }

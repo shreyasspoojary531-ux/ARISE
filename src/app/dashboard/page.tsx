@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
@@ -10,51 +11,55 @@ export const metadata: Metadata = {
   description: 'Your hunter dashboard.',
 }
 
-export const dynamic = 'force-dynamic'
+// ── Static data hoisted outside the component to avoid per-render allocation ──
+const FUTURE_MODULES = [
+  { label: 'SKILLS', status: 'IN DEVELOPMENT' },
+  { label: 'GYM PROGRESSION', status: 'IN DEVELOPMENT' },
+  { label: 'QUESTS', status: 'IN DEVELOPMENT' },
+  { label: 'DAILY MISSIONS', status: 'IN DEVELOPMENT' },
+  { label: 'STATS', status: 'IN DEVELOPMENT' },
+  { label: 'CLAN SYSTEM', status: 'IN DEVELOPMENT' },
+] as const
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+
+  // ── Parallel data fetching — auth + onboarding state run concurrently ──
+  const [authResult, onboardingState] = await Promise.all([
+    supabase.auth.getUser(),
+    getOnboardingState(supabase),
+  ])
+
+  const { user } = authResult.data
 
   if (!user) {
     redirect('/login')
   }
 
   // Gate: redirect to onboarding if not complete
-  const onboardingState = await getOnboardingState(supabase)
   if (!isOnboardingComplete(onboardingState)) {
     redirect('/onboarding')
   }
 
-  // Auth user data
+  // ── Derived data ──────────────────────────────────────────────────────
   const displayName =
-    user?.user_metadata?.display_name ??
-    user?.user_metadata?.full_name ??
-    user?.email?.split('@')[0] ??
+    user.user_metadata?.display_name ??
+    user.user_metadata?.full_name ??
+    user.email?.split('@')[0] ??
     'Hunter'
 
-  const email = user?.email ?? ''
-  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined
-  const joinedAt = user?.created_at
+  const email = user.email ?? ''
+  const avatarUrl = user.user_metadata?.avatar_url as string | undefined
+  const joinedAt = user.created_at
     ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : '—'
 
-  // Player profile data from onboarding
   const profile = onboardingState.profile
   const playerName = profile?.name ?? displayName
   const playerGoal = profile?.goal ?? '—'
   const playerAge = profile?.age ? String(profile.age) : '—'
   const playerHeight = profile?.height ? `${profile.height} cm` : '—'
   const playerWeight = profile?.weight ? `${profile.weight} kg` : '—'
-
-  const FUTURE_MODULES = [
-    { label: 'SKILLS', status: 'IN DEVELOPMENT' },
-    { label: 'GYM PROGRESSION', status: 'IN DEVELOPMENT' },
-    { label: 'QUESTS', status: 'IN DEVELOPMENT' },
-    { label: 'DAILY MISSIONS', status: 'IN DEVELOPMENT' },
-    { label: 'STATS', status: 'IN DEVELOPMENT' },
-    { label: 'CLAN SYSTEM', status: 'IN DEVELOPMENT' },
-  ]
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -73,8 +78,13 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2.5">
               {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt={displayName} className="w-7 h-7 rounded-full border border-neutral-800 object-cover" />
+                <Image
+                  src={avatarUrl}
+                  alt={displayName}
+                  width={28}
+                  height={28}
+                  className="w-7 h-7 rounded-full border border-neutral-800 object-cover"
+                />
               ) : (
                 <div className="w-7 h-7 rounded-full border border-neutral-800 bg-neutral-900 flex items-center justify-center">
                   <span className="font-orbitron text-[10px] text-neutral-400 font-bold">
@@ -151,8 +161,13 @@ export default async function DashboardPage() {
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
             {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt={displayName} className="w-16 h-16 rounded-full border-2 border-neutral-800 object-cover" />
+              <Image
+                src={avatarUrl}
+                alt={displayName}
+                width={64}
+                height={64}
+                className="w-16 h-16 rounded-full border-2 border-neutral-800 object-cover"
+              />
             ) : (
               <div className="w-16 h-16 rounded-full border-2 border-neutral-800 bg-neutral-900 flex items-center justify-center">
                 <span className="font-orbitron text-xl text-neutral-400 font-bold">

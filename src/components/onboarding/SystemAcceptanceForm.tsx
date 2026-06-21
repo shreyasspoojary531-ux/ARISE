@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { acceptSystemContract, declineSystemContract } from "@/app/auth/actions";
 import { AlertCircle } from "lucide-react";
 
 export function SystemAcceptanceForm() {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
 
@@ -15,12 +13,11 @@ export function SystemAcceptanceForm() {
     setError("");
     startTransition(async () => {
       const result = await acceptSystemContract();
+      // acceptSystemContract() now uses redirect() on success — this only runs on error
       if (result?.error) {
         setError(result.error);
-      } else {
-        router.push("/onboarding/player-registration");
-        router.refresh();
       }
+      // Success = server-side redirect, no client navigation needed
     });
   };
 
@@ -105,9 +102,9 @@ export function SystemAcceptanceForm() {
           whileHover={isPending ? {} : { scale: 1.01 }}
           whileTap={isPending ? {} : { scale: 0.99 }}
           className="flex-1 relative flex items-center justify-center gap-2.5 font-orbitron text-[11px] tracking-widest uppercase font-bold py-3.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]
-            before:absolute before:inset-0 before:-z-10 before:[clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%))]
+            before:absolute before:inset-0 before:-z-10 before:[clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]
             before:bg-cyan-500/30 hover:before:bg-cyan-400/40 before:transition-colors
-            after:absolute after:inset-[1px] after:-z-10 after:[clip-path:polygon(0_5px,5px_0,100%_0,100%_calc(100%-5px),calc(100%-5px)_100%,0_100%))]
+            after:absolute after:inset-[1px] after:-z-10 after:[clip-path:polygon(0_5px,5px_0,100%_0,100%_calc(100%-5px),calc(100%-5px)_100%,0_100%)]
             after:bg-cyan-950/30 hover:after:bg-cyan-950/50 after:transition-colors
             text-cyan-400 hover:text-cyan-300"
         >
@@ -129,9 +126,9 @@ export function SystemAcceptanceForm() {
           whileHover={isPending ? {} : { scale: 1.01 }}
           whileTap={isPending ? {} : { scale: 0.99 }}
           className="flex-1 relative flex items-center justify-center gap-2.5 font-orbitron text-[11px] tracking-widest uppercase font-bold py-3.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]
-            before:absolute before:inset-0 before:-z-10 before:[clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%))]
+            before:absolute before:inset-0 before:-z-10 before:[clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]
             before:bg-neutral-800 hover:before:bg-neutral-700 before:transition-colors
-            after:absolute after:inset-[1px] after:-z-10 after:[clip-path:polygon(0_5px,5px_0,100%_0,100%_calc(100%-5px),calc(100%-5px)_100%,0_100%))]
+            after:absolute after:inset-[1px] after:-z-10 after:[clip-path:polygon(0_5px,5px_0,100%_0,100%_calc(100%-5px),calc(100%-5px)_100%,0_100%)]
             after:bg-black after:transition-colors
             text-neutral-500 hover:text-neutral-200"
         >

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
 import { login } from '@/app/auth/actions'
@@ -121,7 +120,6 @@ function CheckboxField({
 // ── LoginForm ─────────────────────────────────────────────────────────────
 
 export function LoginForm() {
-  const router = useRouter()
   const [email, setEmail]           = useState('')
   const [password, setPassword]     = useState('')
   const [showPassword, setShow]     = useState(false)
@@ -149,13 +147,11 @@ export function LoginForm() {
       fd.set('email', email)
       fd.set('password', password)
       const result = await login(fd)
+      // login() now uses redirect() on success — this code only runs on error
       if (result?.error) {
         setFormError(result.error)
-      } else if (result?.success) {
-        const target = result.redirectTo || '/onboarding'
-        router.push(target)
-        router.refresh()
       }
+      // Success = server-side redirect, no client navigation needed
     })
   }
 
