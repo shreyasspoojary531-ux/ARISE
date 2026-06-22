@@ -29,10 +29,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
         <div className="relative z-10 w-full flex flex-col items-center gap-0">
 
-          {/* Mobile: logo only — no ARISE text */}
-          <div className="lg:hidden mb-8 text-center">
+          {/* Mobile: logo only — centered with flex to handle Next.js Image wrapper */}
+          <div className="lg:hidden mb-8 flex flex-col items-center">
             <Image src="/images/logo.png" alt="ARISE" width={80} height={80} className="object-contain w-20 h-20" />
-            <div className="h-px w-20 mx-auto my-2 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
+            <div className="h-px w-20 my-2 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
             <p className="font-orbitron text-[9px] tracking-[0.25em] text-neutral-600 uppercase">
               Hunter System Online
             </p>
