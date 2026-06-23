@@ -59,8 +59,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       playerName={playerName}
       avatarUrl={avatarUrl}
       age={playerAge}
-      level={24}
-      rank="C"
+      level={1}
+      rank="E"
       logoutAction={logout}
     >
       {children}

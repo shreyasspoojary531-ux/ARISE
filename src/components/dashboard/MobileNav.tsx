@@ -53,7 +53,7 @@ export function MobileNav({ playerName, avatarUrl, level, rank, logoutAction }: 
     STATUS: '/dashboard',
     SKILLS: '/dashboard/skills',
     INVENTORY: '/dashboard/inventory',
-    QUESTS: '/dashboard',
+    QUESTS: '/dashboard/quests',
   }
 
   const tabSubtitles: Record<NavTab, string> = {
@@ -182,62 +182,45 @@ export function MobileNav({ playerName, avatarUrl, level, rank, logoutAction }: 
                 <ul className="flex flex-col gap-1.5">
                   {NAV_TABS.map((tab) => {
                     const active = tab === activeTab
-                    const disabled = tab === 'QUESTS'
 
                     return (
                       <li key={tab}>
-                        {disabled ? (
-                          <span className="group flex items-center justify-between border border-neutral-900 bg-black/40 px-4 py-3 opacity-50 [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]">
-                            <span className="flex flex-col">
-                              <span className="font-orbitron text-[11px] font-semibold tracking-[0.2em] text-neutral-600 uppercase">
-                                {tab}
-                              </span>
-                              <span className="font-sans text-[9px] text-neutral-700">
-                                {tabSubtitles[tab]}
-                              </span>
+                        <Link
+                          href={tabRoute[tab]}
+                          aria-current={active ? 'page' : undefined}
+                          className={cn(
+                            'group relative flex items-center justify-between border px-4 py-3 transition-colors duration-200 [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]',
+                            active
+                              ? 'border-cyan-500/40 bg-cyan-500/10 shadow-[0_0_18px_-8px_rgba(0,212,255,0.5)]'
+                              : 'border-neutral-900 bg-black/40 hover:border-cyan-500/30 hover:bg-cyan-500/5',
+                          )}
+                        >
+                          {/* Active glow accent */}
+                          {active && (
+                            <span className="pointer-events-none absolute left-0 top-1/2 h-2/3 w-px -translate-y-1/2 bg-cyan-400 shadow-[0_0_8px_rgba(0,212,255,0.8)]" />
+                          )}
+                          <span className="flex flex-col">
+                            <span
+                              className={cn(
+                                'font-orbitron text-[11px] font-semibold tracking-[0.2em] uppercase transition-colors',
+                                active
+                                  ? 'text-cyan-300 [text-shadow:0_0_10px_rgba(0,212,255,0.6)]'
+                                  : 'text-neutral-300 group-hover:text-white',
+                              )}
+                            >
+                              {tab}
                             </span>
-                            <span className="font-mono text-[6px] tracking-wider text-neutral-700">
-                              SOON
+                            <span className="font-sans text-[9px] text-neutral-600">
+                              {tabSubtitles[tab]}
                             </span>
                           </span>
-                        ) : (
-                          <Link
-                            href={tabRoute[tab]}
-                            aria-current={active ? 'page' : undefined}
+                          <ChevronRight
                             className={cn(
-                              'group relative flex items-center justify-between border px-4 py-3 transition-colors duration-200 [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]',
-                              active
-                                ? 'border-cyan-500/40 bg-cyan-500/10 shadow-[0_0_18px_-8px_rgba(0,212,255,0.5)]'
-                                : 'border-neutral-900 bg-black/40 hover:border-cyan-500/30 hover:bg-cyan-500/5',
+                              'h-4 w-4 transition-colors',
+                              active ? 'text-cyan-400' : 'text-neutral-700 group-hover:text-neutral-400',
                             )}
-                          >
-                            {/* Active glow accent */}
-                            {active && (
-                              <span className="pointer-events-none absolute left-0 top-1/2 h-2/3 w-px -translate-y-1/2 bg-cyan-400 shadow-[0_0_8px_rgba(0,212,255,0.8)]" />
-                            )}
-                            <span className="flex flex-col">
-                              <span
-                                className={cn(
-                                  'font-orbitron text-[11px] font-semibold tracking-[0.2em] uppercase transition-colors',
-                                  active
-                                    ? 'text-cyan-300 [text-shadow:0_0_10px_rgba(0,212,255,0.6)]'
-                                    : 'text-neutral-300 group-hover:text-white',
-                                )}
-                              >
-                                {tab}
-                              </span>
-                              <span className="font-sans text-[9px] text-neutral-600">
-                                {tabSubtitles[tab]}
-                              </span>
-                            </span>
-                            <ChevronRight
-                              className={cn(
-                                'h-4 w-4 transition-colors',
-                                active ? 'text-cyan-400' : 'text-neutral-700 group-hover:text-neutral-400',
-                              )}
-                            />
-                          </Link>
-                        )}
+                          />
+                        </Link>
                       </li>
                     )
                   })}

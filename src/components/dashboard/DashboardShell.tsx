@@ -132,7 +132,7 @@ function SystemNav({
     STATUS: '/dashboard',
     SKILLS: '/dashboard/skills',
     INVENTORY: '/dashboard/inventory',
-    QUESTS: '/dashboard',
+    QUESTS: '/dashboard/quests',
   }
 
   return (
@@ -328,7 +328,7 @@ function SystemNav({
           <span className="flex items-center gap-1.5">
             <span className="font-orbitron text-[7px] tracking-[0.3em] text-neutral-600 uppercase">EP</span>
             <span className="flex gap-[2px]">
-              {[0.8, 0.8, 0.7, 0.55, 0.18].map((o, i) => (
+              {[0.15, 0.1, 0.1, 0.1, 0.05].map((o, i) => (
                 <span
                   key={i}
                   className="h-2 w-[3px] bg-cyan-500"
@@ -336,7 +336,7 @@ function SystemNav({
                 />
               ))}
             </span>
-            <span className="font-orbitron text-[9px] font-bold text-cyan-400/60 tracking-wider">2840</span>
+            <span className="font-orbitron text-[9px] font-bold text-cyan-400/60 tracking-wider">0</span>
           </span>
 
           <span className="h-3 w-px bg-neutral-800" />
@@ -415,19 +415,8 @@ function SystemNav({
         {NAV_TABS.map((tab) => {
           const active = tab === activeTab
           const href = tabRoute[tab]
-          const disabled = tab === 'QUESTS'
 
-          return disabled ? (
-            <span
-              key={tab}
-              className="relative px-2 py-0.5 font-orbitron text-[9px] sm:text-[10px] font-semibold tracking-[0.2em] uppercase text-neutral-700"
-            >
-              {tab}
-              <span className="absolute -top-1 right-0 font-mono text-[5px] leading-none tracking-wider text-neutral-700">
-                SOON
-              </span>
-            </span>
-          ) : (
+          return (
             <Link
               key={tab}
               href={href}
