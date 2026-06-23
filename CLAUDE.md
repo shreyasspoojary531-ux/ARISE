@@ -153,7 +153,7 @@ src/
 │   ├── auth/                 # Auth actions + OAuth callback
 │   │   ├── actions.ts        # All server actions (login, signup, onboarding, etc.)
 │   │   └── callback/route.ts # OAuth callback handler
-│   ├── dashboard/page.tsx    # Protected dashboard (after onboarding)
+│   ├── dashboard/page.tsx    # Protected dashboard — renders <StatusDashboard> (STATUS screen)
 │   ├── onboarding/           # Onboarding flow
 │   │   ├── page.tsx          # Redirects to current step
 │   │   ├── layout.tsx        # Onboarding layout wrapper
@@ -167,6 +167,16 @@ src/
 │   ├── auth/                 # Auth page components
 │   │   ├── AuthLayout.tsx, AuthBackground.tsx, AuthCard.tsx
 │   │   ├── LoginForm.tsx, SignupForm.tsx
+│   ├── dashboard/            # STATUS screen (Solo Leveling HUD dashboard)
+│   │   ├── mock-data.ts               # Typed mock arrays (player, attributes, quests, skills)
+│   │   ├── primitives.tsx             # HudPanel, PanelHeader, ProgressBar, CornerAccents, StatTile
+│   │   ├── DashboardBackground.tsx    # Grid + glow + memoized floating particles
+│   │   ├── SystemNav.tsx              # Centered SYSTEM title + tabs (STATUS active)
+│   │   ├── ProfileFrame.tsx           # Circular holographic frame: rings, scanner, avatar
+│   │   ├── LeftColumn.tsx             # Status + Attributes + Stat Points + Inventory
+│   │   ├── CenterColumn.tsx           # ProfileFrame + Life Performance + Physical Fitness
+│   │   ├── RightColumn.tsx            # Active Quests + Skills + Mental Discipline
+│   │   └── StatusDashboard.tsx        # Top-level 3-col composition (client)
 │   ├── landing/              # Landing page sections
 │   │   ├── Navbar.tsx, HeroSection.tsx, Footer.tsx
 │   │   ├── CoreSystemsSection.tsx, SystemCard.tsx
@@ -484,8 +494,8 @@ This creates the required tables:
 ## 10. KNOWN ISSUES & TECH DEBT
 
 - **Duplicated InputField/CheckboxField**: `LoginForm` and `SignupForm` each define their own `InputField` and `CheckboxField` sub-components. These should be extracted to a shared component.
-- **Dashboard placeholder**: The dashboard shows "coming soon" content — quest, habit, skill tree, and progression systems are not yet built.
-- **ESLint suppressions**: Dashboard uses `// eslint-disable-next-line @next/next/no-img-element` for avatar images (should use `next/image`).
+- **Dashboard STATUS screen (visual-only)**: The `/dashboard` route renders a Solo Leveling-inspired STATUS HUD (`src/components/dashboard/`). It is **mock-data only** — all RPG metrics (level, XP, attributes, quests, skills, fortitude score) are static constants in `mock-data.ts`. Only identity fields (name, avatar, age) come from the real Supabase session. The SKILLS / INVENTORY / QUESTS tabs are inactive placeholders (STATUS-only build). No backend feature integration yet.
+- **ESLint suppressions**: Legacy dashboard used `// eslint-disable-next-line @next/next/no-img-element` for avatars — the current `StatusDashboard`/`ProfileFrame` use `next/image`.
 
 ---
 

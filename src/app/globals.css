@@ -136,3 +136,68 @@
 .shadow-orbital {
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
+
+/* ── Dashboard STATUS screen motion ──────────────────────────────────── */
+
+/* Soft cyan pulse for hero numerics (stat points, fortitude score). */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 18px rgba(0, 212, 255, 0.6);
+  }
+  50% {
+    opacity: 0.82;
+    text-shadow: 0 0 28px rgba(0, 212, 255, 0.9);
+  }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Horizontal energy line that sweeps across a panel. */
+@keyframes energyLine {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.energy-line {
+  animation: energyLine 4s ease-in-out infinite;
+}
+
+/* ── Dashboard page entrance (CSS, no JS) ─────────────────────────────── */
+
+/* One-shot panel rise — used by Skills/Inventory Server Components
+   so they render fast without shipping framer-motion to the client. */
+@keyframes panelRise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-panel-rise {
+  animation: panelRise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Subtle liveness pulse for a single strategic energy node in the nav.
+   Confined to one connector point — not a blanket glow. */
+@keyframes nodePulse {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 1; }
+}
+.nav-node-live {
+  animation: nodePulse 3.5s ease-in-out infinite;
+}
+
+/* ── Dashboard loading skeleton ──────────────────────────────────────── */
+/* Low-cost horizontal sweep for the loading.tsx placeholders. GPU-friendly
+   translateX only — no layout thrash — and prefers-reduced-motion safe. */
+@keyframes skeletonShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton-shimmer {
+  animation: skeletonShimmer 1.8s ease-in-out infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none; }
+}

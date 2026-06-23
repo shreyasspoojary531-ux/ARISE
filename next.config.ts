@@ -1,13 +1,31 @@
 import type { NextConfig } from "next";
 
+const supabaseProjectRef =
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/^https?:\/\//, "").split(".")[0] ?? "";
+
 const nextConfig: NextConfig = {
   // ── Image optimization ──────────────────────────────────────────────────
+  // Remote `next/image` hosts are allow-listed explicitly. A wildcard ("**")
+  // would let any URL be proxied through the image optimizer — an open
+  // resize-DoS vector under load. Only the hosts we actually serve avatars
+  // from are permitted: the project's own Supabase Storage bucket + the
+  // common OAuth identity-provider avatar CDNs.
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**", // Allow Supabase storage and OAuth provider avatars
-      },
+      // Supabase Storage (project bucket + legacy *.supabase.co domains)
+      ...(supabaseProjectRef
+        ? [
+            { protocol: "https" as const, hostname: `${supabaseProjectRef}.supabase.co` },
+            { protocol: "https" as const, hostname: `${supabaseProjectRef}.supabase.in` },
+          ]
+        : []),
+      // OAuth provider avatars
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },   // Google
+      { protocol: "https", hostname: "avatars.githubusercontent.com" }, // GitHub
+      { protocol: "https", hostname: "graph.facebook.com" },           // Facebook
+      { protocol: "https", hostname: "graph.microsoft.com" },          // Microsoft
+      { protocol: "https", hostname: "appleid.apple.com" },            // Apple
+      { protocol: "https", hostname: "platform-lookaside.fbsbx.com" }, // Facebook legacy
     ],
   },
 
