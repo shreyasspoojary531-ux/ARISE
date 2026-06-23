@@ -50,15 +50,20 @@
     outline-color: rgba(0, 212, 255, 0.2);
   }
   
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: none;          /* Firefox — hide all page scrollbars */
+    -ms-overflow-style: none;       /* Legacy IE/Edge */
+  }
+  html::-webkit-scrollbar {
+    display: none;                   /* Chrome/Safari — hide page scrollbar */
+  }
+
   body {
     background-color: #000000;
     color: #ffffff;
     font-family: var(--font-inter), sans-serif;
     overflow-x: hidden;
-  }
-  
-  html {
-    scroll-behavior: smooth;
   }
 }
 
@@ -200,4 +205,16 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .skeleton-shimmer { animation: none; }
+}
+
+/* ── Hidden scrollbar utility ───────────────────────────────────────────
+   Content scrolls normally but the scrollbar track/thumb is invisible.
+   Used on the dashboard main content area and sub-page containers so the
+   viewport scrolls without a visible scrollbar. */
+.scrollbar-hidden {
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* Legacy IE/Edge */
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;                   /* Chrome/Safari */
 }

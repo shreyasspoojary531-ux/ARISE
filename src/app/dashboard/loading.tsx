@@ -8,21 +8,23 @@ import { DashboardBackground } from '@/components/dashboard/DashboardBackground'
  */
 export default function DashboardLoading() {
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black">
+    <div className="relative min-h-screen w-full overflow-hidden bg-black lg:h-screen lg:w-screen">
       <DashboardBackground />
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-[1500px] flex-col px-4 sm:px-6">
-        {/* Skeleton nav rail (matches SystemNav height) */}
-        <div className="h-[60px] flex-shrink-0" />
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1500px] flex-col px-4 sm:px-6 lg:h-full">
+        {/* Skeleton nav rail (matches SystemNav height, desktop only) */}
+        <div className="hidden h-[60px] flex-shrink-0 lg:block" />
+        {/* Skeleton mobile header (matches MobileNav height, mobile only) */}
+        <div className="h-14 flex-shrink-0 border-b border-neutral-900 lg:hidden" />
 
-        {/* Skeleton three-column grid */}
-        <div className="grid h-full min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-12">
+        {/* Skeleton three-column grid (desktop) / stacked blocks (mobile) */}
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:h-full lg:grid-cols-12">
           <div className="hidden flex-col gap-3 lg:col-span-3 lg:flex">
             <PanelSkeleton className="h-[180px]" />
             <PanelSkeleton className="flex-1" />
             <PanelSkeleton className="h-[100px]" />
           </div>
-          <div className="flex min-h-0 flex-col gap-3 lg:col-span-6">
-            <PanelSkeleton className="flex-1" />
+          <div className="flex flex-col gap-3 lg:col-span-6 lg:min-h-0">
+            <PanelSkeleton className="h-[300px] lg:flex-1" />
             <PanelSkeleton className="h-[200px]" />
           </div>
           <div className="hidden flex-col gap-3 lg:col-span-3 lg:flex">

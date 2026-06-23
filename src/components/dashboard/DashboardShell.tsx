@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { DashboardBackground } from './DashboardBackground'
+import { MobileNav } from './MobileNav'
 import { NAV_TABS, type NavTab } from './mock-data'
 import { cn } from '@/lib/utils'
 
@@ -38,9 +39,15 @@ interface DashboardShellProps extends DashboardContextValue {
  * DashboardShell — wraps all dashboard sub-pages.
  * Provides:
  *  - DashboardBackground (grid, glow, particles)
- *  - SystemNav (full-width HUD rail with center notch)
+ *  - SystemNav (desktop, full-width HUD rail with center notch)
+ *  - MobileNav (mobile, sticky header + slide-out drawer)
  *  - DashboardContext (session data for child components)
- *  - Full-viewport layout (no scroll, h-screen)
+ *
+ * Responsive contract:
+ *  - Desktop (lg+): fixed viewport, no page scroll — identical to before.
+ *  - Mobile (<lg): the page scrolls naturally; content flows vertically.
+ *    The `lg:h-screen lg:overflow-hidden` / `lg:h-full lg:overflow-hidden`
+ *    prefixes guarantee the desktop output is byte-for-byte unchanged.
  */
 export function DashboardShell({
   playerName,
@@ -53,17 +60,28 @@ export function DashboardShell({
 }: DashboardShellProps) {
   return (
     <DashboardContext.Provider value={{ playerName, avatarUrl, age, level, rank }}>
-      <div className="relative h-screen w-screen overflow-hidden bg-black text-white">
+      <div className="relative min-h-screen w-full bg-black text-white lg:h-screen lg:w-screen scrollbar-hidden lg:overflow-y-auto">
         <DashboardBackground />
-        <div className="relative z-10 flex h-full flex-col">
-          <SystemNav
+        <div className="relative z-10 flex min-h-screen flex-col lg:h-full">
+          {/* Desktop nav — untouched, rendered only at lg+. */}
+          <div className="hidden lg:block">
+            <SystemNav
+              playerName={playerName}
+              avatarUrl={avatarUrl}
+              level={level}
+              rank={rank}
+              logoutAction={logoutAction}
+            />
+          </div>
+          {/* Mobile nav — sticky header + drawer, rendered only below lg. */}
+          <MobileNav
             playerName={playerName}
             avatarUrl={avatarUrl}
             level={level}
             rank={rank}
             logoutAction={logoutAction}
           />
-          <main className="flex-1 overflow-hidden">{children}</main>
+          <main className="flex-1">{children}</main>
         </div>
       </div>
     </DashboardContext.Provider>

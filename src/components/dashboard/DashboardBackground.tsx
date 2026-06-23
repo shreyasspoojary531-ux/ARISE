@@ -49,10 +49,14 @@ export function DashboardBackground() {
         }}
       />
 
-      {/* Rising particles */}
-      {DASHBOARD_PARTICLES.map((p) => (
-        <Particle key={p.id} x={p.x} duration={p.duration} delay={p.delay} size={p.size} />
-      ))}
+      {/* Rising particles — desktop only. The infinite Framer Motion tweens
+          are a meaningful CPU/GPU cost on mobile; the grid/glow/scanlines
+          above are cheap (pure CSS) and stay on for all breakpoints. */}
+      <div className="hidden lg:block">
+        {DASHBOARD_PARTICLES.map((p) => (
+          <Particle key={p.id} x={p.x} duration={p.duration} delay={p.delay} size={p.size} />
+        ))}
+      </div>
     </div>
   )
 }

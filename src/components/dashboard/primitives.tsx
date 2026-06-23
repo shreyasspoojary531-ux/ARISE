@@ -51,6 +51,7 @@ export function HudPanel({
   rightHeader,
   glow = false,
   scanline = false,
+  bodyClassName,
 }: {
   children: React.ReactNode
   className?: string
@@ -58,14 +59,17 @@ export function HudPanel({
   rightHeader?: React.ReactNode
   glow?: boolean
   scanline?: boolean
+  // Override the default panel padding (e.g. for full-bleed children).
+  // Optional — every existing caller is unaffected and keeps the default.
+  bodyClassName?: string
 }) {
   return (
     <section
       className={cn(
-        'relative border border-neutral-800/70 bg-neutral-950/50 backdrop-blur-md p-4 sm:p-5',
+        'relative border border-neutral-800/70 bg-neutral-950/50 backdrop-blur-md transition-colors duration-300',
+        bodyClassName ?? 'p-4 sm:p-5',
         scanline && 'hud-scanline',
         glow && 'border-cyan-500/25 shadow-[0_0_24px_-8px_rgba(0,212,255,0.35)]',
-        'transition-colors duration-300',
         className,
       )}
       style={{ clipPath: CLIP_PANEL }}

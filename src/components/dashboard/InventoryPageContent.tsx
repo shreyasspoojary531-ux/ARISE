@@ -8,7 +8,7 @@ import { HudPanel, SectionLabel } from './primitives'
  */
 export function InventoryPageContent() {
   return (
-    <div className="mx-auto flex h-full w-full max-w-[1200px] flex-col px-4 py-4 sm:px-6 gap-4 overflow-y-auto">
+    <div className="scrollbar-hidden mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 py-4 sm:px-6 lg:h-full lg:overflow-y-auto">
       <div className="animate-panel-rise">
         <HudPanel header="INVENTORY" rightHeader={<SectionLabel>{INVENTORY.length} ITEMS</SectionLabel>} scanline glow>
           {/* Stats summary */}

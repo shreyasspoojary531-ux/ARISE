@@ -8,7 +8,7 @@ import { HudPanel, PanelHeader, ProgressBar, SectionLabel } from './primitives'
  */
 export function SkillsPageContent() {
   return (
-    <div className="mx-auto flex h-full w-full max-w-[1200px] flex-col px-4 py-4 sm:px-6 gap-4 overflow-y-auto">
+    <div className="scrollbar-hidden mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 py-4 sm:px-6 lg:h-full lg:overflow-y-auto">
       {/* Active Skills Grid */}
       <div className="animate-panel-rise">
         <HudPanel header="ACTIVE SKILLS" rightHeader={<SectionLabel>{SKILLS.length} UNLOCKED</SectionLabel>}>
@@ -85,7 +85,7 @@ export function SkillsPageContent() {
         {/* Mental Fortitude — compact, no animation, matches the Discipline panel height */}
         <HudPanel header="MENTAL FORTITUDE" glow>
           <div className="flex h-full flex-col justify-center">
-            <div className="flex items-center justify-center gap-6">
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
               {/* Score readout */}
               <div className="flex flex-col items-center">
                 <span className="font-orbitron text-3xl font-black text-cyan-400 [text-shadow:0_0_18px_rgba(0,212,255,0.5)]">
@@ -96,15 +96,15 @@ export function SkillsPageContent() {
                 </span>
               </div>
 
-              {/* Divider */}
-              <span className="h-12 w-px bg-neutral-800" />
+              {/* Divider — horizontal on mobile, vertical on desktop */}
+              <span className="h-px w-2/3 bg-neutral-800 sm:h-12 sm:w-px" />
 
               {/* Composite breakdown */}
-              <div className="flex flex-col gap-1.5">
+              <div className="grid w-full grid-cols-2 gap-x-4 gap-y-1.5 sm:flex sm:flex-col">
                 {MENTAL_DISCIPLINES.map((d) => (
                   <div key={d.label} className="flex items-center gap-2">
                     <d.icon className="h-3.5 w-3.5 text-cyan-500/60" />
-                    <span className="w-24 font-orbitron text-[8px] tracking-widest text-neutral-500">
+                    <span className="flex-1 font-orbitron text-[8px] tracking-widest text-neutral-500 sm:w-24 sm:flex-none">
                       {d.label}
                     </span>
                     <span className="font-orbitron text-[11px] font-bold text-white">{d.level}</span>
