@@ -60,7 +60,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   return (
     <DashboardContext.Provider value={{ playerName, avatarUrl, age, level, rank }}>
-      <div className="relative min-h-screen w-full bg-black text-white lg:h-screen lg:w-screen scrollbar-hidden lg:overflow-y-auto">
+      <div className="relative min-h-screen w-full bg-black text-white lg:h-screen lg:w-screen scrollbar-hidden lg:overflow-hidden">
         <DashboardBackground />
         <div className="relative z-10 flex min-h-screen flex-col lg:h-full">
           {/* Desktop nav — untouched, rendered only at lg+. */}

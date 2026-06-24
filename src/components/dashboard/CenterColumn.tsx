@@ -41,10 +41,10 @@ export const CenterColumn = memo(function CenterColumn({ playerName, avatarUrl, 
         </HudPanel>
       </motion.div>
 
-      {/* PHYSICAL FITNESS */}
+      {/* PHYSICAL FITNESS — compact, fixed natural height (untouched) */}
       <motion.div custom={1} initial="hidden" animate="visible" variants={PANEL_VARIANTS} className="flex-shrink-0">
         <HudPanel header="PHYSICAL FITNESS" rightHeader={<SectionLabel>VITAL STATS</SectionLabel>}>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2">
             {PHYSICAL_FITNESS.map((stat) => (
               <StatTile
                 key={stat.label}

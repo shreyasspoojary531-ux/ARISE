@@ -4,6 +4,7 @@ import { LeftColumn } from './LeftColumn'
 import { CenterColumn } from './CenterColumn'
 import { RightColumn } from './RightColumn'
 import { useDashboard } from './DashboardShell'
+import { CreditsFooter } from './CreditsFooter'
 
 /**
  * StatusDashboard — the STATUS tab content.
@@ -50,6 +51,9 @@ export function StatusDashboard() {
           VER 1.0.0 // STABLE
         </span>
       </footer>
+
+      {/* Credits row */}
+      <CreditsFooter className="flex flex-shrink-0 items-center justify-between border-t border-neutral-900 pt-1.5 mt-1.5" />
     </div>
   )
 }

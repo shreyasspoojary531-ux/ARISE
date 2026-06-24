@@ -2,14 +2,9 @@
 
 import { memo } from 'react'
 import { motion } from 'framer-motion'
-import {
-  ACTIVE_QUESTS,
-  KNOWLEDGE_TREE_LEVEL,
-  KNOWLEDGE_TREE_MAX,
-  MENTAL_DISCIPLINES,
-  MENTAL_FORTITUDE_SCORE,
-} from './mock-data'
-import { HudPanel, PanelHeader, ProgressBar, SectionLabel } from './primitives'
+import { ACTIVE_QUESTS, LONG_TERM_QUESTS } from './mock-data'
+import { HudPanel, ProgressBar, SectionLabel } from './primitives'
+import { StreakGridCard } from './StreakGridCard'
 import { cn } from '@/lib/utils'
 
 const PANEL_VARIANTS = {
@@ -22,7 +17,7 @@ const PANEL_VARIANTS = {
 }
 
 /**
- * RightColumn — Active Quests + Mental Discipline.
+ * RightColumn — Active Quests + Streak Grid.
  * Skills moved to /dashboard/skills.
  *
  * Memoized: no props, all static mock data — memo prevents re-render on
@@ -31,32 +26,48 @@ const PANEL_VARIANTS = {
 export const RightColumn = memo(function RightColumn() {
   return (
     <div className="flex h-full flex-col gap-3">
-      {/* ACTIVE QUESTS */}
+      {/* ACTIVE QUESTS — DAILY + LONG TERM in one panel */}
       <motion.div custom={0} initial="hidden" animate="visible" variants={PANEL_VARIANTS} className="flex-1 min-h-0">
-        <HudPanel header="ACTIVE QUESTS" rightHeader={<SectionLabel>DAILY</SectionLabel>} className="h-full flex flex-col">
-          <ActiveQuestPanel />
+        <HudPanel
+          header="ACTIVE QUESTS"
+          rightHeader={<SectionLabel>{ACTIVE_QUESTS.length + LONG_TERM_QUESTS.length} ACTIVE</SectionLabel>}
+          className="h-full flex flex-col"
+        >
+          <div className="flex flex-1 flex-col gap-3 overflow-hidden">
+            {/* ── DAILY ─────────────────────────────────────────── */}
+            <QuestGroup label="DAILY" quests={ACTIVE_QUESTS} />
+
+            {/* ── Separator ─────────────────────────────────────── */}
+            <div className="flex items-center gap-2">
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-neutral-800 to-transparent" />
+              <span className="font-orbitron text-[7px] tracking-[0.3em] text-neutral-700">◇</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-neutral-800 to-transparent" />
+            </div>
+
+            {/* ── LONG TERM ─────────────────────────────────────── */}
+            <QuestGroup label="LONG TERM" quests={LONG_TERM_QUESTS} />
+          </div>
         </HudPanel>
       </motion.div>
 
-      {/* MENTAL DISCIPLINE */}
+      {/* STREAK GRID */}
       <motion.div custom={1} initial="hidden" animate="visible" variants={PANEL_VARIANTS} className="flex-shrink-0">
-        <HudPanel header="MENTAL DISCIPLINE" glow>
-          <MentalDisciplinePanel />
-        </HudPanel>
+        <StreakGridCard />
       </motion.div>
     </div>
   )
 })
 
-function ActiveQuestPanel() {
+function QuestGroup({ label, quests }: { label: string; quests: typeof ACTIVE_QUESTS }) {
   return (
-    <div className="flex flex-col gap-2 overflow-hidden">
-      {ACTIVE_QUESTS.map((quest) => {
+    <div className="flex flex-col gap-2">
+      <SectionLabel className="text-cyan-400/70">{label}</SectionLabel>
+      {quests.map((quest) => {
         const complete = quest.progress >= 100
         return (
           <div
             key={quest.name}
-            className="group border border-neutral-900 bg-black/50 p-2.5 transition-colors duration-200 hover:border-cyan-500/30 flex-shrink-0 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]"
+            className="group border border-neutral-900 bg-black/50 p-2.5 transition-colors duration-200 hover:border-cyan-500/30 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -76,7 +87,7 @@ function ActiveQuestPanel() {
                   complete ? 'text-green-500' : 'text-cyan-400',
                 )}
               >
-                +{quest.xp} XP
+                +{quest.xp.toLocaleString()} XP
               </span>
             </div>
             <div className="mt-1.5 flex items-center gap-2">
@@ -88,57 +99,6 @@ function ActiveQuestPanel() {
           </div>
         )
       })}
-    </div>
-  )
-}
-
-function MentalDisciplinePanel() {
-  return (
-    <div className="space-y-3">
-      {/* Discipline icon row */}
-      <div className="grid grid-cols-4 gap-1.5">
-        {MENTAL_DISCIPLINES.map((d) => (
-          <div
-            key={d.label}
-            className="group flex flex-col items-center gap-1 border border-neutral-900 bg-black/50 p-1.5 transition-colors duration-200 hover:border-cyan-500/40 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
-          >
-            <d.icon className="h-3.5 w-3.5 text-neutral-500 transition-colors group-hover:text-cyan-400" />
-            <span className="text-center font-orbitron text-[7px] leading-tight tracking-wider text-neutral-500">
-              {d.label}
-            </span>
-            <span className="font-orbitron text-[8px] font-bold text-cyan-400">{d.level}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Knowledge tree progress */}
-      <div className="border-t border-neutral-900 pt-3">
-        <div className="flex items-center justify-between">
-          <SectionLabel className="text-cyan-400/80">KNOWLEDGE TREE</SectionLabel>
-          <span className="font-orbitron text-[9px] font-bold text-cyan-400">
-            LV. {KNOWLEDGE_TREE_LEVEL} / {KNOWLEDGE_TREE_MAX}
-          </span>
-        </div>
-        <div className="mt-1.5">
-          <ProgressBar
-            value={KNOWLEDGE_TREE_LEVEL}
-            max={KNOWLEDGE_TREE_MAX}
-            height="h-1.5"
-            barClassName="shadow-[0_0_12px_#00d4ff]"
-          />
-        </div>
-      </div>
-
-      {/* Mental fortitude score */}
-      <div
-        className="relative overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-transparent p-3 text-center [clip-path:polygon(0_8px,8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]"
-      >
-        <div className="energy-line pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
-        <SectionLabel className="text-cyan-400/80">MENTAL FORTITUDE SCORE</SectionLabel>
-        <div className="mt-1 font-orbitron text-3xl font-black text-cyan-400 [text-shadow:0_0_20px_rgba(0,212,255,0.7)] animate-pulse-glow">
-          {MENTAL_FORTITUDE_SCORE.toLocaleString()}
-        </div>
-      </div>
     </div>
   )
 }

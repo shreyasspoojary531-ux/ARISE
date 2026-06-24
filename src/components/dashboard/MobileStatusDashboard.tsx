@@ -5,16 +5,15 @@ import {
   ACTIVE_QUESTS,
   ATTRIBUTES,
   AVAILABLE_STAT_POINTS,
-  KNOWLEDGE_TREE_LEVEL,
-  KNOWLEDGE_TREE_MAX,
-  MENTAL_DISCIPLINES,
-  MENTAL_FORTITUDE_SCORE,
+  LONG_TERM_QUESTS,
   PHYSICAL_FITNESS,
   PLAYER_STATUS,
 } from './mock-data'
 import { HudPanel, ProgressBar, SectionLabel, StatTile } from './primitives'
+import { StreakGridCard } from './StreakGridCard'
 import { ProfileFrame } from './ProfileFrame'
 import { useDashboard } from './DashboardShell'
+import { CreditsFooter } from './CreditsFooter'
 import { cn } from '@/lib/utils'
 
 const PANEL_VARIANTS = {
@@ -74,17 +73,17 @@ export function MobileStatusDashboard() {
         variants={PANEL_VARIANTS}
         className="grid grid-cols-2 items-stretch gap-3"
       >
-        <HudPanel header="ATTRIBUTES" rightHeader={<SectionLabel>8/8</SectionLabel>} className="flex flex-col">
+        <HudPanel header="ATTRIBUTES" rightHeader={<SectionLabel>6/6</SectionLabel>} className="flex flex-col">
           <MobileAttributesPanel />
         </HudPanel>
-        <HudPanel header="QUESTS" rightHeader={<SectionLabel>DAILY</SectionLabel>} className="flex flex-col">
+        <HudPanel header="QUESTS" rightHeader={<SectionLabel>{ACTIVE_QUESTS.length + LONG_TERM_QUESTS.length} ACTIVE</SectionLabel>} className="flex flex-col">
           <MobileQuestPanel />
         </HudPanel>
       </motion.div>
 
-      {/* ── 4. MENTAL DISCIPLINE — full width ──────────────────────────── */}
+      {/* ── 4. STREAK GRID — full width ────────────────────────────────── */}
       <motion.div custom={3} initial="hidden" animate="visible" variants={PANEL_VARIANTS}>
-        <MobileMentalDisciplinePanel />
+        <StreakGridCard />
       </motion.div>
 
       {/* ── 5. PHYSICAL FITNESS — full width ───────────────────────────── */}
@@ -122,6 +121,9 @@ export function MobileStatusDashboard() {
           </span>
         </div>
       </footer>
+
+      {/* Credits row */}
+      <CreditsFooter className="flex items-center justify-between border-t border-neutral-900 pt-1.5 mt-1.5" />
     </div>
   )
 }
@@ -192,88 +194,67 @@ function MobileAttributesPanel() {
 
 function MobileQuestPanel() {
   return (
-    <div className="flex flex-1 flex-col gap-1.5">
-      {ACTIVE_QUESTS.slice(0, 4).map((quest) => {
-        const complete = quest.progress >= 100
-        return (
-          <div
-            key={quest.name}
-            className="border border-neutral-900 bg-black/50 p-1.5 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
-          >
-            <div className="flex items-center justify-between gap-1">
-              <div className="flex min-w-0 items-center gap-1">
-                <quest.icon
-                  className={cn(
-                    'h-3 w-3 shrink-0',
-                    complete ? 'text-green-500' : 'text-cyan-500/70',
-                  )}
-                />
-                <span className="truncate font-orbitron text-[8px] font-semibold tracking-wider text-neutral-200">
-                  {quest.name}
-                </span>
-              </div>
-              <span
-                className={cn(
-                  'shrink-0 font-orbitron text-[8px] font-bold tracking-wider',
-                  complete ? 'text-green-500' : 'text-cyan-400',
-                )}
-              >
-                +{quest.xp}
-              </span>
-            </div>
-            <div className="mt-1 flex items-center gap-1.5">
-              <ProgressBar value={quest.progress} height="h-1" barClassName={complete ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : undefined} />
-              <span className="w-7 shrink-0 text-right font-mono text-[7px] tracking-wider text-neutral-500">
-                {quest.progress}%
-              </span>
-            </div>
-          </div>
-        )
-      })}
+    <div className="flex flex-1 flex-col gap-2">
+      {/* ── DAILY ─────────────────────────────────────────── */}
+      <div className="flex flex-col gap-1.5">
+        <SectionLabel className="text-cyan-400/70">DAILY</SectionLabel>
+        {ACTIVE_QUESTS.slice(0, 4).map((quest) => (
+          <MobileQuestItem key={quest.name} quest={quest} />
+        ))}
+      </div>
+
+      {/* ── Separator ─────────────────────────────────────── */}
+      <div className="flex items-center gap-2">
+        <span className="h-px flex-1 bg-gradient-to-r from-transparent via-neutral-800 to-transparent" />
+        <span className="font-orbitron text-[7px] tracking-[0.3em] text-neutral-700">◇</span>
+        <span className="h-px flex-1 bg-gradient-to-r from-transparent via-neutral-800 to-transparent" />
+      </div>
+
+      {/* ── LONG TERM ─────────────────────────────────────── */}
+      <div className="flex flex-col gap-1.5">
+        <SectionLabel className="text-cyan-400/70">LONG TERM</SectionLabel>
+        {LONG_TERM_QUESTS.map((quest) => (
+          <MobileQuestItem key={quest.name} quest={quest} />
+        ))}
+      </div>
     </div>
   )
 }
 
-function MobileMentalDisciplinePanel() {
+function MobileQuestItem({ quest }: { quest: typeof ACTIVE_QUESTS[number] }) {
+  const complete = quest.progress >= 100
   return (
-    <HudPanel header="MENTAL DISCIPLINE" glow>
-      <div className="space-y-3">
-        <div className="grid grid-cols-4 gap-1.5">
-          {MENTAL_DISCIPLINES.map((d) => (
-            <div
-              key={d.label}
-              className="group flex flex-col items-center gap-1 border border-neutral-900 bg-black/50 p-1.5 transition-colors duration-200 hover:border-cyan-500/40 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
-            >
-              <d.icon className="h-3.5 w-3.5 text-neutral-500 transition-colors group-hover:text-cyan-400" />
-              <span className="text-center font-orbitron text-[7px] leading-tight tracking-wider text-neutral-500">
-                {d.label}
-              </span>
-              <span className="font-orbitron text-[8px] font-bold text-cyan-400">{d.level}</span>
-            </div>
-          ))}
+    <div
+      className="border border-neutral-900 bg-black/50 p-1.5 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+    >
+      <div className="flex items-center justify-between gap-1">
+        <div className="flex min-w-0 items-center gap-1">
+          <quest.icon
+            className={cn(
+              'h-3 w-3 shrink-0',
+              complete ? 'text-green-500' : 'text-cyan-500/70',
+            )}
+          />
+          <span className="truncate font-orbitron text-[8px] font-semibold tracking-wider text-neutral-200">
+            {quest.name}
+          </span>
         </div>
-
-        <div className="border-t border-neutral-900 pt-3">
-          <div className="flex items-center justify-between">
-            <SectionLabel className="text-cyan-400/80">KNOWLEDGE TREE</SectionLabel>
-            <span className="font-orbitron text-[9px] font-bold text-cyan-400">
-              LV. {KNOWLEDGE_TREE_LEVEL} / {KNOWLEDGE_TREE_MAX}
-            </span>
-          </div>
-          <div className="mt-1.5">
-            <ProgressBar value={KNOWLEDGE_TREE_LEVEL} max={KNOWLEDGE_TREE_MAX} height="h-1.5" barClassName="shadow-[0_0_12px_#00d4ff]" />
-          </div>
-        </div>
-
-        <div className="relative overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-transparent p-3 text-center [clip-path:polygon(0_8px,8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]">
-          <div className="energy-line pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
-          <SectionLabel className="text-cyan-400/80">MENTAL FORTITUDE SCORE</SectionLabel>
-          <div className="mt-1 font-orbitron text-3xl font-black text-cyan-400 [text-shadow:0_0_20px_rgba(0,212,255,0.7)] animate-pulse-glow">
-            {MENTAL_FORTITUDE_SCORE.toLocaleString()}
-          </div>
-        </div>
+        <span
+          className={cn(
+            'shrink-0 font-orbitron text-[8px] font-bold tracking-wider',
+            complete ? 'text-green-500' : 'text-cyan-400',
+          )}
+        >
+          +{quest.xp.toLocaleString()}
+        </span>
       </div>
-    </HudPanel>
+      <div className="mt-1 flex items-center gap-1.5">
+        <ProgressBar value={quest.progress} height="h-1" barClassName={complete ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : undefined} />
+        <span className="w-7 shrink-0 text-right font-mono text-[7px] tracking-wider text-neutral-500">
+          {quest.progress}%
+        </span>
+      </div>
+    </div>
   )
 }
 

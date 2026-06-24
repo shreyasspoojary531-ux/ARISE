@@ -40,7 +40,7 @@ export const LeftColumn = memo(function LeftColumn() {
 
       {/* ATTRIBUTES */}
       <motion.div custom={1} initial="hidden" animate="visible" variants={PANEL_VARIANTS} className="flex-1 min-h-0">
-        <HudPanel header="ATTRIBUTES" rightHeader={<SectionLabel>8 / 8</SectionLabel>} className="h-full flex flex-col">
+        <HudPanel header="ATTRIBUTES" rightHeader={<SectionLabel>6 / 6</SectionLabel>} className="h-full flex flex-col">
           <AttributesPanel />
         </HudPanel>
       </motion.div>
@@ -104,7 +104,7 @@ function StatusPanel() {
 
 function AttributesPanel() {
   return (
-    <div className="flex flex-col gap-2.5 overflow-hidden">
+    <div className="flex flex-1 flex-col justify-between gap-2.5 overflow-hidden">
       {ATTRIBUTES.map((attr, i) => (
         <div key={attr.name} className="space-y-1 flex-shrink-0">
           <div className="flex items-center justify-between">

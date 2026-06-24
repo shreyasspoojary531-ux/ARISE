@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, LogOut, ChevronRight } from 'lucide-react'
 import { NAV_TABS, type NavTab } from './mock-data'
+import { CreditsFooter } from './CreditsFooter'
 import { cn } from '@/lib/utils'
 
 interface MobileNavProps {
@@ -272,6 +273,9 @@ export function MobileNav({ playerName, avatarUrl, level, rank, logoutAction }: 
                     LOGOUT
                   </button>
                 </form>
+
+                {/* Credits */}
+                <CreditsFooter className="mt-3 flex items-center justify-between border-t border-neutral-900 pt-2" />
               </div>
             </motion.aside>
           </>

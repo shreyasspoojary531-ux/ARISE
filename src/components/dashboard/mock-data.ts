@@ -71,13 +71,11 @@ export interface Attribute {
 
 export const ATTRIBUTES: Attribute[] = [
   { name: 'STRENGTH',     value: 10, max: 100, bonus: 0, icon: Dumbbell },
-  { name: 'ENDURANCE',    value: 10, max: 100, bonus: 0, icon: HeartPulse },
   { name: 'DISCIPLINE',   value: 10, max: 100, bonus: 0, icon: ShieldCheck },
   { name: 'INTELLIGENCE', value: 10, max: 100, bonus: 0, icon: Brain },
-  { name: 'CREATIVITY',   value: 10, max: 100, bonus: 0, icon: Lightbulb },
   { name: 'FOCUS',        value: 10, max: 100, bonus: 0, icon: Target },
-  { name: 'CONSISTENCY', value: 10, max: 100, bonus: 0, icon: Repeat },
-  { name: 'CONFIDENCE',   value: 10, max: 100, bonus: 0, icon: Flame },
+  { name: 'CONSISTENCY',  value: 10, max: 100, bonus: 0, icon: Repeat },
+  { name: 'SKILL',        value: 10, max: 100, bonus: 0, icon: Crosshair },
 ]
 
 export const AVAILABLE_STAT_POINTS = 0
@@ -126,12 +124,9 @@ export interface FitnessStat {
 }
 
 export const PHYSICAL_FITNESS: FitnessStat[] = [
-  { label: 'WORKOUT STREAK',   value: '0',  unit: 'DAYS', icon: Flame },
-  { label: 'WEEKLY WORKOUTS',  value: '0',  unit: '/7',   icon: Dumbbell },
-  { label: 'CALORIES BURNED',  value: '0',  unit: 'KCAL', icon: Activity },
-  { label: 'PROTEIN INTAKE',   value: '0',  unit: 'G',    icon: Drumstick },
-  { label: 'WATER INTAKE',     value: '0',  unit: 'L',    icon: Droplets },
-  { label: 'SLEEP SCORE',      value: '0',  unit: '/100', icon: Moon },
+  { label: 'WORKOUT STREAK',  value: '0', unit: 'DAYS', icon: Flame },
+  { label: 'WEEKLY WORKOUTS', value: '0', unit: '/7',   icon: Dumbbell },
+  { label: 'SLEEP SCORE',     value: '0', unit: '/100', icon: Moon },
 ]
 
 export interface Quest {
@@ -141,8 +136,16 @@ export interface Quest {
   icon: LucideIcon
 }
 
-/** No active quests — a new hunter starts empty. */
-export const ACTIVE_QUESTS: Quest[] = []
+/** Daily quests reset every day. */
+export const ACTIVE_QUESTS: Quest[] = [
+  { name: 'MORNING WORKOUT', progress: 0, xp: 50, icon: Dumbbell },
+  { name: 'READ 30 MINUTES', progress: 0, xp: 40, icon: BookOpen },
+]
+
+/** Long-term quests — persistent multi-stage objectives. */
+export const LONG_TERM_QUESTS: Quest[] = [
+  { name: 'COMPLETE 30-DAY CHALLENGE', progress: 0, xp: 5000, icon: Trophy },
+]
 
 export interface SkillCard {
   name: string
@@ -175,6 +178,39 @@ export const MENTAL_DISCIPLINES: MentalDiscipline[] = [
 export const KNOWLEDGE_TREE_LEVEL = 0
 export const KNOWLEDGE_TREE_MAX = 100
 export const MENTAL_FORTITUDE_SCORE = 0
+
+// ── Streak Grid — daily habit/task completion heatmap ────────────────────
+export type StreakIntensity = 0 | 1 | 2 | 3 | 4
+
+export interface StreakDay {
+  offset: number
+  intensity: StreakIntensity
+}
+
+export interface StreakGrid {
+  days: StreakDay[]
+  longestStreak: number
+  currentStreak: number
+  activeDays: number
+}
+
+const STREAK_WEEKS = 8
+function buildStreakDays(): StreakDay[] {
+  const total = STREAK_WEEKS * 7
+  return Array.from({ length: total }, (_, i) => {
+    const offset = total - 1 - i
+    return { offset, intensity: 0 as StreakIntensity }
+  })
+}
+
+export const STREAK_GRID: StreakGrid = {
+  days: buildStreakDays(),
+  longestStreak: 0,
+  currentStreak: 0,
+  activeDays: 0,
+}
+
+export const STREAK_GRID_WEEKS = STREAK_WEEKS
 
 // Pre-computed floating particles for the dashboard background.
 // Deterministic values — never randomize at render time.
