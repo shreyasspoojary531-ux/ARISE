@@ -18,10 +18,10 @@ export function AuthCard({ children, title, subtitle }: AuthCardProps) {
       className="relative w-full max-w-[420px]"
     >
       {/* Outer glow */}
-      <div className="absolute -inset-px bg-gradient-to-b from-cyan-500/10 to-transparent rounded-none pointer-events-none [clip-path:polygon(0_12px,12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%)]" />
+      <div className="absolute -inset-px bg-gradient-to-b from-cyan-500/10 to-transparent rounded-none pointer-events-none clip-hud-12" />
 
       {/* Card */}
-      <div className="relative border border-neutral-800/80 bg-neutral-950/90 backdrop-blur-xl px-8 py-8 hud-scanline [clip-path:polygon(0_12px,12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%)]">
+      <div className="relative border border-neutral-800/80 bg-neutral-950/90 backdrop-blur-xl px-8 py-8 hud-scanline clip-hud-12">
 
         {/* Corner accents — top-left cyan */}
         <span className="absolute top-0 left-0 w-5 h-[1px] bg-cyan-500/70" />

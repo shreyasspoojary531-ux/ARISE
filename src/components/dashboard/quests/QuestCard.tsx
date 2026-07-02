@@ -102,7 +102,7 @@ export function QuestCard({ quest, onToggle, onEdit, onDelete }: QuestCardProps)
                 type="button"
                 onClick={() => onEdit(quest)}
                 aria-label="Edit quest"
-                className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-500 transition-colors hover:border-cyan-500/50 hover:text-cyan-400 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+                className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-500 transition-colors hover:border-cyan-500/50 hover:text-cyan-400 clip-hud-3"
               >
                 <Pencil className="h-3 w-3" />
               </button>
@@ -112,7 +112,7 @@ export function QuestCard({ quest, onToggle, onEdit, onDelete }: QuestCardProps)
                   type="button"
                   onClick={() => setConfirming(true)}
                   aria-label="Delete quest"
-                  className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-500 transition-colors hover:border-red-500/50 hover:text-red-400 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+                  className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-500 transition-colors hover:border-red-500/50 hover:text-red-400 clip-hud-3"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>
@@ -128,7 +128,7 @@ export function QuestCard({ quest, onToggle, onEdit, onDelete }: QuestCardProps)
                     <button
                       type="button"
                       onClick={() => onDelete(quest.id)}
-                      className="flex h-6 sm:h-7 items-center gap-1 border border-red-500/50 bg-red-500/10 px-2 font-orbitron text-[8px] font-bold tracking-wider uppercase text-red-300 transition-colors hover:bg-red-500/20 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+                      className="flex h-6 sm:h-7 items-center gap-1 border border-red-500/50 bg-red-500/10 px-2 font-orbitron text-[8px] font-bold tracking-wider uppercase text-red-300 transition-colors hover:bg-red-500/20 clip-hud-3"
                     >
                       Delete?
                     </button>
@@ -136,7 +136,7 @@ export function QuestCard({ quest, onToggle, onEdit, onDelete }: QuestCardProps)
                       type="button"
                       onClick={() => setConfirming(false)}
                       aria-label="Cancel delete"
-                      className="ml-1 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-500 transition-colors hover:text-neutral-200 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+                      className="ml-1 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-500 transition-colors hover:text-neutral-200 clip-hud-3"
                     >
                       <span className="text-xs">×</span>
                     </button>

@@ -8,9 +8,9 @@ import { DashboardBackground } from '@/components/dashboard/DashboardBackground'
  */
 export default function DashboardLoading() {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-black lg:h-screen lg:w-screen">
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black lg:h-dvh">
       <DashboardBackground />
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1500px] flex-col px-4 sm:px-6 lg:h-full">
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-[1500px] flex-col px-4 sm:px-6 lg:h-full">
         {/* Skeleton nav rail (matches SystemNav height, desktop only) */}
         <div className="hidden h-[60px] flex-shrink-0 lg:block" />
         {/* Skeleton mobile header (matches MobileNav height, mobile only) */}

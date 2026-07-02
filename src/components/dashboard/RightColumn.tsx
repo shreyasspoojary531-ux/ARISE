@@ -30,6 +30,7 @@ export const RightColumn = memo(function RightColumn() {
       <motion.div custom={0} initial="hidden" animate="visible" variants={PANEL_VARIANTS} className="flex-1 min-h-0">
         <HudPanel
           header="ACTIVE QUESTS"
+          energyLine
           rightHeader={<SectionLabel>{ACTIVE_QUESTS.length + LONG_TERM_QUESTS.length} ACTIVE</SectionLabel>}
           className="h-full flex flex-col"
         >
@@ -67,7 +68,7 @@ function QuestGroup({ label, quests }: { label: string; quests: typeof ACTIVE_QU
         return (
           <div
             key={quest.name}
-            className="group border border-neutral-900 bg-black/50 p-2.5 transition-colors duration-200 hover:border-cyan-500/30 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]"
+            className="group border border-neutral-900 bg-black/50 p-2.5 transition-colors duration-200 hover:border-cyan-500/30 clip-hud-4"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

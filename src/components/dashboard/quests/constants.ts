@@ -42,18 +42,16 @@ export const STORAGE_KEYS = {
 
 export const SECTION_META: Record<
   QuestType,
-  { title: string; subtitle: string; storageKey: string; rightHeaderLabel: string }
+  { title: string; subtitle: string; storageKey: string }
 > = {
   daily: {
     title: 'DAILY QUESTS',
     subtitle: 'Recurring routines and daily activities.',
     storageKey: STORAGE_KEYS.daily,
-    rightHeaderLabel: 'DAILY',
   },
   'long-term': {
     title: 'LONG-TERM QUESTS',
     subtitle: 'Larger goals that take days, weeks, or months.',
     storageKey: STORAGE_KEYS.longTerm,
-    rightHeaderLabel: 'CAMPAIGN',
   },
 }

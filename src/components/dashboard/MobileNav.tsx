@@ -100,7 +100,7 @@ export function MobileNav({ playerName, avatarUrl, level, rank, logoutAction }: 
         </Link>
 
         {/* LV / RANK chip */}
-        <div className="flex items-center gap-2 border border-neutral-800 bg-black/40 px-2 py-1 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]">
+        <div className="flex items-center gap-2 border border-neutral-800 bg-black/40 px-2 py-1 clip-hud-3">
           <span className="flex items-center gap-1">
             <span className="font-orbitron text-[7px] tracking-[0.25em] text-neutral-600 uppercase">LV</span>
             <span className="font-orbitron text-[9px] font-bold text-cyan-400">{level}</span>
@@ -119,7 +119,7 @@ export function MobileNav({ playerName, avatarUrl, level, rank, logoutAction }: 
           aria-label={open ? 'Close menu' : 'Open menu'}
           aria-expanded={open}
           aria-controls="mobile-drawer"
-          className="group relative flex h-9 w-9 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-400 transition-colors duration-200 hover:border-cyan-500/50 hover:text-cyan-400 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+          className="group relative flex h-9 w-9 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-400 transition-colors duration-200 hover:border-cyan-500/50 hover:text-cyan-400 clip-hud-3"
         >
           <span className="pointer-events-none absolute left-0 top-0 h-1.5 w-px bg-neutral-700 transition-colors group-hover:bg-cyan-500/60" />
           <span className="pointer-events-none absolute left-0 top-0 h-px w-1.5 bg-neutral-700 transition-colors group-hover:bg-cyan-500/60" />
@@ -172,7 +172,7 @@ export function MobileNav({ playerName, avatarUrl, level, rank, logoutAction }: 
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label="Close menu"
-                  className="group relative flex h-8 w-8 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-400 transition-colors hover:border-red-500/50 hover:text-red-400 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+                  className="group relative flex h-8 w-8 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-400 transition-colors hover:border-red-500/50 hover:text-red-400 clip-hud-3"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -190,7 +190,7 @@ export function MobileNav({ playerName, avatarUrl, level, rank, logoutAction }: 
                           href={tabRoute[tab]}
                           aria-current={active ? 'page' : undefined}
                           className={cn(
-                            'group relative flex items-center justify-between border px-4 py-3 transition-colors duration-200 [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]',
+                            'group relative flex items-center justify-between border px-4 py-3 transition-colors duration-200 clip-hud-6',
                             active
                               ? 'border-cyan-500/40 bg-cyan-500/10 shadow-[0_0_18px_-8px_rgba(0,212,255,0.5)]'
                               : 'border-neutral-900 bg-black/40 hover:border-cyan-500/30 hover:bg-cyan-500/5',
@@ -267,7 +267,7 @@ export function MobileNav({ playerName, avatarUrl, level, rank, logoutAction }: 
                 <form action={logoutAction} className="mt-3">
                   <button
                     type="submit"
-                    className="group flex w-full items-center justify-center gap-2 border border-neutral-800 bg-black/40 px-4 py-2.5 font-orbitron text-[10px] font-bold tracking-[0.2em] text-neutral-400 transition-colors hover:border-red-500/50 hover:text-red-400 hover:shadow-[0_0_16px_-6px_rgba(239,68,68,0.6)] [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]"
+                    className="group flex w-full items-center justify-center gap-2 border border-neutral-800 bg-black/40 px-4 py-2.5 font-orbitron text-[10px] font-bold tracking-[0.2em] text-neutral-400 transition-colors hover:border-red-500/50 hover:text-red-400 hover:shadow-[0_0_16px_-6px_rgba(239,68,68,0.6)] clip-hud-4"
                   >
                     <LogOut className="h-3.5 w-3.5 transition-transform group-hover:translate-x-px" />
                     LOGOUT

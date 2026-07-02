@@ -4,16 +4,13 @@ import * as React from 'react'
 import { Clock, Calendar, AlertCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QUEST_CATEGORIES } from './constants'
+import { HudInput } from '@/components/ui/hud-input'
 import { cn } from '@/lib/utils'
 import type { QuestCategory } from './types'
 
 /**
  * Shared, HUD-styled form fields for the Quest create/edit form.
- *
- * The text input mirrors the `InputField` pattern from LoginForm (CLAUDE.md §3.5):
- * Orbitron label, clip-path corners, neutral-700 placeholder, focus → cyan border,
- * red border on error. Native <input type="time"> / type="date"> are reskinned to
- * the same HUD treatment.
+ * TextField now delegates to the shared HudInput component.
  */
 
 // ── Text input ──────────────────────────────────────────────────────────────
@@ -30,66 +27,15 @@ interface TextFieldProps {
   autoComplete?: string
 }
 
-export function TextField({
-  id,
-  label,
-  value,
-  onChange,
-  placeholder,
-  icon,
-  error,
-  maxLength,
-  autoComplete,
-}: TextFieldProps) {
+export function TextField(props: TextFieldProps) {
   return (
-    <div className="space-y-1.5">
-      <label
-        htmlFor={id}
-        className="block font-orbitron text-[8px] sm:text-[9px] tracking-widest text-neutral-500 uppercase"
-      >
-        {label}
-      </label>
-      <div className="relative">
-        {icon && (
-          <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-700 pointer-events-none sm:left-3">
-            {icon}
-          </div>
-        )}
-        <input
-          id={id}
-          name={id}
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          autoComplete={autoComplete}
-          className={cn(
-            'w-full bg-neutral-900/60 border text-white text-xs sm:text-sm font-sans placeholder:text-neutral-700',
-            'px-3 py-2.5 sm:px-4 sm:py-3 outline-none transition-colors duration-200',
-            '[clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]',
-            icon && 'pl-9',
-            error
-              ? 'border-red-500/50 focus:border-red-400/70'
-              : 'border-neutral-800 focus:border-cyan-500/50',
-          )}
-        />
-      </div>
-      <AnimatePresence>
-        {error && (
-          <motion.p
-            key="err"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-1.5 font-sans text-[11px] sm:text-xs text-red-400"
-          >
-            <AlertCircle size={10} className="shrink-0" />
-            {error}
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </div>
+    <HudInput
+      {...props}
+      // ponytail: quest forms use responsive sizing vs auth's fixed sizing
+      inputClassName="text-xs sm:text-sm px-3 py-2.5 sm:px-4 sm:py-3"
+      labelClassName="text-[8px] sm:text-[9px]"
+      iconClassName="left-2.5 sm:left-3"
+    />
   )
 }
 
@@ -117,7 +63,7 @@ export function CategoryChips({ value, onChange }: CategoryChipsProps) {
               onClick={() => onChange(c.label)}
               className={cn(
                 'group relative inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 font-orbitron text-[8px] sm:text-[9px] font-semibold tracking-widest uppercase transition-colors duration-200 cursor-pointer',
-                '[clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]',
+                'clip-hud-3',
                 active
                   ? 'border border-cyan-400/70 bg-cyan-500/15 text-cyan-300 shadow-[0_0_14px_-4px_rgba(0,212,255,0.7)]'
                   : 'border border-neutral-800 bg-black/40 text-neutral-500 hover:border-cyan-500/40 hover:text-neutral-200',
@@ -196,7 +142,7 @@ export function TimeInput({ id, value, onChange }: TimeInputProps) {
         className={cn(
           'w-full bg-neutral-900/60 border border-neutral-800 text-white text-xs sm:text-sm font-sans focus:border-cyan-500/50',
           'px-2 py-2.5 pl-8 sm:px-3 sm:py-3 sm:pl-9 outline-none transition-colors duration-200',
-          '[clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]',
+          'clip-hud-4',
           '[color-scheme:dark]',
         )}
       />
@@ -229,7 +175,7 @@ export function DateInput({ id, value, onChange, min }: DateInputProps) {
         className={cn(
           'w-full bg-neutral-900/60 border border-neutral-800 text-white text-xs sm:text-sm font-sans focus:border-cyan-500/50',
           'px-2 py-2.5 pl-8 sm:px-3 sm:py-3 sm:pl-9 outline-none transition-colors duration-200',
-          '[clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]',
+          'clip-hud-4',
           '[color-scheme:dark]',
         )}
       />

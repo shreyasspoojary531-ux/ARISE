@@ -225,7 +225,7 @@ function MobileQuestItem({ quest }: { quest: typeof ACTIVE_QUESTS[number] }) {
   const complete = quest.progress >= 100
   return (
     <div
-      className="border border-neutral-900 bg-black/50 p-1.5 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+      className="border border-neutral-900 bg-black/50 p-1.5 clip-hud-3"
     >
       <div className="flex items-center justify-between gap-1">
         <div className="flex min-w-0 items-center gap-1">
@@ -261,7 +261,7 @@ function MobileQuestItem({ quest }: { quest: typeof ACTIVE_QUESTS[number] }) {
 function MobileStatPointsPanel() {
   return (
     <div
-      className="relative overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-transparent p-3 [clip-path:polygon(0_10px,10px_0,100%_0,100%_calc(100%-10px),calc(100%-10px)_100%,0_100%)]"
+      className="relative overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-transparent p-3 clip-hud-10"
     >
       <div className="energy-line pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
       <div className="flex items-center justify-between">

@@ -1,7 +1,7 @@
 'use client'
 
 import { Plus } from 'lucide-react'
-import { HudPanel, PanelHeader, SectionLabel } from '../primitives'
+import { HudPanel, PanelHeader } from '../primitives'
 import { QuestCard } from './QuestCard'
 import { QuestEmptyState } from './QuestEmptyState'
 import { SECTION_META } from './constants'
@@ -38,13 +38,10 @@ export function QuestSection({
 
   return (
     <HudPanel
-      scanline
       glow
       header={
         <div className="flex flex-col gap-0.5">
-          <PanelHeader right={<SectionLabel>{meta.rightHeaderLabel}</SectionLabel>}>
-            {meta.title}
-          </PanelHeader>
+          <PanelHeader>{meta.title}</PanelHeader>
           <span className="-mt-3 font-sans text-[11px] sm:text-xs text-neutral-500">{meta.subtitle}</span>
         </div>
       }
@@ -80,7 +77,7 @@ export function QuestSection({
       ) : isEmpty ? (
         <QuestEmptyState />
       ) : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {quests.map((quest) => (
             <QuestCard
               key={quest.id}

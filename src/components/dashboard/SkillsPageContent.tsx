@@ -16,9 +16,9 @@ export function SkillsPageContent() {
             {SKILLS.map((skill) => (
               <div
                 key={skill.name}
-                className="group flex items-center gap-3 border border-neutral-900 bg-black/50 p-4 transition-colors duration-200 hover:border-cyan-500/30 [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]"
+                className="group flex items-center gap-3 border border-neutral-900 bg-black/50 p-4 transition-colors duration-200 hover:border-cyan-500/30 clip-hud-6"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-neutral-800 bg-neutral-950 transition-colors duration-200 group-hover:border-cyan-500/40 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-neutral-800 bg-neutral-950 transition-colors duration-200 group-hover:border-cyan-500/40 clip-hud-4">
                   <skill.icon className="h-6 w-6 text-neutral-500 transition-colors group-hover:text-cyan-400" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -51,7 +51,7 @@ export function SkillsPageContent() {
               {MENTAL_DISCIPLINES.map((d) => (
                 <div
                   key={d.label}
-                  className="group flex flex-col items-center gap-1.5 border border-neutral-900 bg-black/50 p-3 transition-colors duration-200 hover:border-cyan-500/40 [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+                  className="group flex flex-col items-center gap-1.5 border border-neutral-900 bg-black/50 p-3 transition-colors duration-200 hover:border-cyan-500/40 clip-hud-3"
                 >
                   <d.icon className="h-5 w-5 text-neutral-500 transition-colors group-hover:text-cyan-400" />
                   <span className="text-center font-orbitron text-[8px] leading-tight tracking-wider text-neutral-500">

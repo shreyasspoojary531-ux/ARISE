@@ -75,7 +75,7 @@ export const StreakGridCard = memo(function StreakGridCard({
       <div className="flex flex-col gap-3">
         {/* ── Current streak hero readout ─────────────────────────────── */}
         <div
-          className="relative flex items-center justify-between overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-transparent px-3 py-2.5 [clip-path:polygon(0_8px,8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]"
+          className="relative flex items-center justify-between overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-transparent px-3 py-2.5 clip-hud-8"
         >
           <div className="energy-line pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
           <div className="flex items-center gap-2">

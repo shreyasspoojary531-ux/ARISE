@@ -36,7 +36,7 @@ export const CenterColumn = memo(function CenterColumn({ playerName, avatarUrl, 
     <div className="flex h-full flex-col gap-3">
       {/* PROFILE */}
       <motion.div custom={0} initial="hidden" animate="visible" variants={PANEL_VARIANTS} className="flex-1 min-h-0">
-        <HudPanel glow scanline className="h-full flex flex-col items-center justify-center">
+        <HudPanel glow energyLine className="h-full flex flex-col items-center justify-center">
           <ProfileFrame playerName={playerName} avatarUrl={avatarUrl} age={age} level={level} rank={rank} />
         </HudPanel>
       </motion.div>

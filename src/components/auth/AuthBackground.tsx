@@ -155,7 +155,7 @@ export function AuthBackground() {
           transition={{ duration: 0.6, delay: 0.6 }}
         >
           {STATS.map(({ label, value }) => (
-            <div key={label} className="border border-neutral-900 bg-black/40 py-3 text-center [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]">
+            <div key={label} className="border border-neutral-900 bg-black/40 py-3 text-center clip-hud-4">
               <div className="font-orbitron text-[8px] tracking-widest text-neutral-700">{label}</div>
               <div className="font-orbitron text-[11px] font-bold text-cyan-400 mt-0.5">{value}</div>
             </div>

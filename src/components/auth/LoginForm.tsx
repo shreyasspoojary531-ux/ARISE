@@ -6,117 +6,7 @@ import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
 import { login } from '@/app/auth/actions'
 import { useAuthStages } from '@/lib/use-auth-stages'
 import { cn } from '@/lib/utils'
-
-// ── Shared input wrapper ──────────────────────────────────────────────────
-
-interface InputFieldProps {
-  id: string
-  label: string
-  type?: string
-  value: string
-  onChange: (v: string) => void
-  placeholder?: string
-  icon?: React.ReactNode
-  endAdornment?: React.ReactNode
-  error?: string
-  autoComplete?: string
-}
-
-function InputField({
-  id, label, type = 'text', value, onChange,
-  placeholder, icon, endAdornment, error, autoComplete,
-}: InputFieldProps) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className="block font-orbitron text-[9px] tracking-widest text-neutral-500 uppercase">
-        {label}
-      </label>
-      <div className="relative">
-        {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-700 pointer-events-none">
-            {icon}
-          </div>
-        )}
-        <input
-          id={id}
-          name={id}
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          className={cn(
-            'w-full bg-neutral-900/60 border text-white text-sm font-sans placeholder:text-neutral-700',
-            'px-4 py-3 outline-none transition-colors duration-200',
-            '[clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]',
-            icon && 'pl-9',
-            endAdornment && 'pr-10',
-            error
-              ? 'border-red-500/50 focus:border-red-400/70'
-              : 'border-neutral-800 focus:border-cyan-500/50',
-          )}
-        />
-        {endAdornment && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            {endAdornment}
-          </div>
-        )}
-      </div>
-      <AnimatePresence>
-        {error && (
-          <motion.p
-            key="err"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-1.5 font-sans text-xs text-red-400"
-          >
-            <AlertCircle size={10} className="shrink-0" />
-            {error}
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
-// ── CheckboxField ─────────────────────────────────────────────────────────
-
-function CheckboxField({
-  id, checked, onChange, label,
-}: { id: string; checked: boolean; onChange: (v: boolean) => void; label: React.ReactNode }) {
-  return (
-    <label htmlFor={id} className="flex items-center gap-2.5 cursor-pointer group">
-      <div
-        className={cn(
-          'relative w-4 h-4 shrink-0 border transition-colors duration-150',
-          '[clip-path:polygon(0_2px,2px_0,100%_0,100%_calc(100%-2px),calc(100%-2px)_100%,0_100%)]',
-          checked ? 'border-cyan-500 bg-cyan-500/20' : 'border-neutral-700 bg-neutral-900 group-hover:border-neutral-600',
-        )}
-      >
-        <input
-          type="checkbox"
-          id={id}
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-          className="sr-only"
-        />
-        {checked && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <div className="w-2 h-2 bg-cyan-400" />
-          </motion.div>
-        )}
-      </div>
-      <span className="font-sans text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors">
-        {label}
-      </span>
-    </label>
-  )
-}
+import { HudInput, HudCheckbox } from '@/components/ui/hud-input'
 
 // ── LoginForm ─────────────────────────────────────────────────────────────
 
@@ -174,7 +64,7 @@ export function LoginForm() {
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="flex items-start gap-2.5 border border-red-500/30 bg-red-500/10 px-3 py-3 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]"
+            className="flex items-start gap-2.5 border border-red-500/30 bg-red-500/10 px-3 py-3 clip-hud-4"
           >
             <AlertCircle size={13} className="text-red-400 shrink-0 mt-0.5" />
             <span className="font-sans text-xs text-red-300">{formError}</span>
@@ -183,7 +73,7 @@ export function LoginForm() {
       </AnimatePresence>
 
       {/* Email */}
-      <InputField
+      <HudInput
         id="email"
         label="Email Address"
         type="email"
@@ -196,7 +86,7 @@ export function LoginForm() {
       />
 
       {/* Password */}
-      <InputField
+      <HudInput
         id="password"
         label="Password"
         type={showPassword ? 'text' : 'password'}
@@ -220,7 +110,7 @@ export function LoginForm() {
 
       {/* Remember me + Forgot password */}
       <div className="flex items-center justify-between pt-0.5">
-        <CheckboxField
+        <HudCheckbox
           id="remember-me"
           checked={rememberMe}
           onChange={setRememberMe}
@@ -241,10 +131,10 @@ export function LoginForm() {
         whileHover={isPending ? {} : { scale: 1.01 }}
         whileTap={isPending ? {} : { scale: 0.99 }}
         className={cn(
-          "w-full relative flex items-center justify-center gap-2.5 font-orbitron text-[11px] tracking-widest uppercase font-bold mt-2 py-3.5 transition-all duration-200 disabled:cursor-not-allowed cursor-pointer [clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]",
-          "before:absolute before:inset-0 before:-z-10 before:[clip-path:polygon(0_6px,6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%)]",
+          "w-full relative flex items-center justify-center gap-2.5 font-orbitron text-[11px] tracking-widest uppercase font-bold mt-2 py-3.5 transition-all duration-200 disabled:cursor-not-allowed cursor-pointer clip-hud-6",
+          "before:absolute before:inset-0 before:-z-10 before:clip-hud-6",
           "before:bg-cyan-500/30 hover:before:bg-cyan-400/40 before:transition-colors",
-          "after:absolute after:inset-[1px] after:-z-10 after:[clip-path:polygon(0_5px,5px_0,100%_0,100%_calc(100%-5px),calc(100%-5px)_100%,0_100%)]",
+          "after:absolute after:inset-[1px] after:-z-10 after:clip-hud-5",
           "after:bg-cyan-950/30 after:transition-colors",
           isPending && !isFinalStage ? "opacity-80" : "disabled:opacity-60",
           isFinalStage ? "text-green-400" : "text-cyan-400 hover:text-cyan-300"
@@ -258,7 +148,7 @@ export function LoginForm() {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="w-3.5 h-3.5 bg-green-400 [clip-path:polygon(0_2px,2px_0,100%_0,100%_calc(100%-2px),calc(100%-2px)_100%,0_100%)]"
+                className="w-3.5 h-3.5 bg-green-400 clip-hud-2"
               />
             )}
             <AnimatePresence mode="wait">

@@ -17,8 +17,12 @@ export function StatusDashboard() {
 
   return (
     <div className="mx-auto flex h-full w-full max-w-[1500px] flex-col px-4 pt-4 pb-3 sm:px-6">
-      {/* Three-column grid — fills available space, no overflow */}
-      <div className="grid h-full min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-12">
+      {/* Three-column grid — fills available space, no overflow.
+          `lg:grid-rows-1` (→ grid-template-rows: minmax(0,1fr)) makes the single
+          row fill the container height on desktop so the per-column flex-1
+          boxes (Attributes / Profile / Active Quests) can absorb any leftover
+          vertical space on tall monitors instead of leaving it empty below. */}
+      <div className="grid h-full min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-12 lg:grid-rows-1">
         <div className="flex min-h-0 flex-col gap-3 lg:col-span-3">
           <LeftColumn />
         </div>

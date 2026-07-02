@@ -33,7 +33,7 @@ export const LeftColumn = memo(function LeftColumn() {
     <div className="flex h-full flex-col gap-3">
       {/* STATUS PANEL */}
       <motion.div custom={0} initial="hidden" animate="visible" variants={PANEL_VARIANTS} className="flex-shrink-0">
-        <HudPanel header="STATUS" scanline glow rightHeader={<SectionLabel>SYS.VER // 1.0.0</SectionLabel>}>
+        <HudPanel header="STATUS" energyLine glow rightHeader={<SectionLabel>SYS.VER // 1.0.0</SectionLabel>}>
           <StatusPanel />
         </HudPanel>
       </motion.div>
@@ -60,11 +60,11 @@ function StatusPanel() {
     <div className="space-y-3">
       {/* Level + rank header */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="border border-neutral-900 bg-black/50 px-3 py-1.5 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]">
+        <div className="border border-neutral-900 bg-black/50 px-3 py-1.5 clip-hud-4">
           <div className="font-orbitron text-[8px] tracking-widest text-neutral-600">LEVEL</div>
           <div className="font-orbitron text-xl font-black text-white">{level}</div>
         </div>
-        <div className="border border-cyan-500/20 bg-cyan-500/5 px-3 py-1.5 [clip-path:polygon(0_4px,4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%)]">
+        <div className="border border-cyan-500/20 bg-cyan-500/5 px-3 py-1.5 clip-hud-4">
           <div className="font-orbitron text-[8px] tracking-widest text-cyan-400/70">RANK</div>
           <div className="font-orbitron text-xl font-black text-cyan-400">{rank}</div>
         </div>
@@ -104,7 +104,7 @@ function StatusPanel() {
 
 function AttributesPanel() {
   return (
-    <div className="flex flex-1 flex-col justify-between gap-2.5 overflow-hidden">
+    <div className="flex flex-1 flex-col justify-start gap-2.5 overflow-hidden">
       {ATTRIBUTES.map((attr, i) => (
         <div key={attr.name} className="space-y-1 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -133,7 +133,7 @@ function AttributesPanel() {
 function StatPointsPanel() {
   return (
     <div
-      className="relative overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-transparent p-3 [clip-path:polygon(0_10px,10px_0,100%_0,100%_calc(100%-10px),calc(100%-10px)_100%,0_100%)]"
+      className="relative overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-transparent p-3 clip-hud-10"
     >
       <div className="energy-line pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
       <div className="flex items-center justify-between">

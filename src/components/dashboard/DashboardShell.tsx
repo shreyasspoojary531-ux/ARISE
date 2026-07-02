@@ -46,8 +46,10 @@ interface DashboardShellProps extends DashboardContextValue {
  * Responsive contract:
  *  - Desktop (lg+): fixed viewport, no page scroll — identical to before.
  *  - Mobile (<lg): the page scrolls naturally; content flows vertically.
- *    The `lg:h-screen lg:overflow-hidden` / `lg:h-full lg:overflow-hidden`
+ *    The `lg:h-dvh lg:overflow-hidden` / `lg:h-full lg:overflow-hidden`
  *    prefixes guarantee the desktop output is byte-for-byte unchanged.
+ *    `dvh` (dynamic viewport height) is used instead of `h-screen` (100vh)
+ *    so the layout correctly fills the viewport under CSS zoom and fullscreen.
  */
 export function DashboardShell({
   playerName,
@@ -60,9 +62,9 @@ export function DashboardShell({
 }: DashboardShellProps) {
   return (
     <DashboardContext.Provider value={{ playerName, avatarUrl, age, level, rank }}>
-      <div className="relative min-h-screen w-full bg-black text-white lg:h-screen lg:w-screen scrollbar-hidden lg:overflow-hidden">
+      <div className="relative min-h-dvh w-full bg-black text-white lg:h-dvh scrollbar-hidden lg:overflow-hidden">
         <DashboardBackground />
-        <div className="relative z-10 flex min-h-screen flex-col lg:h-full">
+        <div className="relative z-10 flex min-h-dvh flex-col lg:h-full">
           {/* Desktop nav — untouched, rendered only at lg+. */}
           <div className="hidden lg:block">
             <SystemNav
@@ -395,7 +397,7 @@ function SystemNav({
             <button
               type="submit"
               aria-label="Logout"
-              className="group relative flex h-8 w-8 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-500 transition-all duration-200 hover:border-red-500/50 hover:text-red-400 hover:shadow-[0_0_16px_-6px_rgba(239,68,68,0.6)] [clip-path:polygon(0_3px,3px_0,100%_0,100%_calc(100%-3px),calc(100%-3px)_100%,0_100%)]"
+              className="group relative flex h-8 w-8 items-center justify-center border border-neutral-800 bg-black/40 text-neutral-500 transition-all duration-200 hover:border-red-500/50 hover:text-red-400 hover:shadow-[0_0_16px_-6px_rgba(239,68,68,0.6)] clip-hud-3"
             >
               {/* Corner accents */}
               <span className="pointer-events-none absolute left-0 top-0 h-1.5 w-px bg-neutral-700 transition-colors group-hover:bg-red-500/60" />
